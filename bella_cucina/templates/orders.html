@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block title %}Мої замовлення — Bella Cucina{% endblock %}
+{% block content %}
+<div class="content-center">
+    <h1>📦 Мої замовлення</h1>
+
+    {% if orders %}
+        <div class="grid">
+            {% for order in orders %}
+                <div class="card">
+                    <div style="display:flex; justify-content:space-between; align-items:start; margin-bottom:1rem; gap:0.5rem;">
+                        <div>
+                            <div class="card-title">Замовлення №{{ order.id }}</div>
+                            <div style="font-size:0.82rem; color:#888; margin-top:0.25rem;">{{ order.created_at.strftime('%d.%m.%Y %H:%M') }}</div>
+                        </div>
+                        <div class="status-badge status-{{ order.status }}">
+                            {% if order.status == 'pending' %}В очікуванні
+                            {% elif order.status == 'confirmed' %}Підтверджено
+                            {% elif order.status == 'preparing' %}Готується
+                            {% elif order.status == 'ready' %}Готово
+                            {% elif order.status == 'delivered' %}Доставлено
+                            {% elif order.status == 'cancelled' %}Скасовано
+                            {% else %}{{ order.status }}
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div style="padding:1rem 0; border-top:1px solid rgba(212,175,55,0.15); border-bottom:1px solid rgba(212,175,55,0.15); margin-bottom:1rem;">
+                        <div style="font-size:0.88rem; color:#aaa; margin-bottom:0.4rem;">{{ order.items|length }} позицій</div>
+                        <div class="card-price">${{ "%.2f"|format(order.total_price) }}</div>
+                    </div>
+
+                    <div style="display:flex; gap:0.5rem; flex-wrap:wrap;">
+                        <a href="{{ url_for('order_detail', order_id=order.id) }}" class="btn" style="flex:1; text-align:center; padding:0.5rem;">Деталі</a>
+                        {% if order.status == 'confirmed' %}
+                            <form method="POST" action="{{ url_for('cancel_order', order_id=order.id) }}" style="flex:1;">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                <button type="submit" class="btn btn-danger" style="width:100%; padding:0.5rem;">Скасувати</button>
+                            </form>
+                        {% endif %}
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div style="text-align:center; padding:3rem; color:#888;">
+            <div style="font-size:4rem; margin-bottom:1rem;">📦</div>
+            <p style="font-size:1.1rem; margin-bottom:2rem;">Ви ще не робили замовлень.</p>
+            <a href="{{ url_for('menu') }}" class="btn">Розпочати замовлення</a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

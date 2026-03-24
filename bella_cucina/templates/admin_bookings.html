@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% block title %}Управління бронюваннями — Bella Cucina{% endblock %}
+{% block content %}
+<div class="content-center">
+    <a href="{{ url_for('admin_dashboard') }}" class="back-link">← Назад до адмінки</a>
+    <h1>📅 Управління бронюваннями</h1>
+
+    {% if bookings %}
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>№</th>
+                        <th>Клієнт</th>
+                        <th>Дата та час</th>
+                        <th>Гостей</th>
+                        <th>Статус</th>
+                        <th>Примітки</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for booking in bookings %}
+                        <tr>
+                            <td>#{{ booking.id }}</td>
+                            <td style="font-weight:500;">{{ booking.customer.username }}</td>
+                            <td style="white-space:nowrap; color:#f0e68c;">{{ booking.booking_date.strftime('%d.%m.%Y %H:%M') }}</td>
+                            <td>{{ booking.guests }}</td>
+                            <td>
+                                <select onchange="updateBookingStatus({{ booking.id }}, this.value)"
+                                    style="background:rgba(212,175,55,0.1); border:1px solid rgba(212,175,55,0.3); color:#e0e0e0; padding:0.35rem 0.5rem; border-radius:5px; font-size:0.85rem; width:auto;">
+                                    <option value="pending"   {% if booking.status=='pending' %}selected{% endif %}>В очікуванні</option>
+                                    <option value="confirmed" {% if booking.status=='confirmed' %}selected{% endif %}>Підтверджено</option>
+                                    <option value="cancelled" {% if booking.status=='cancelled' %}selected{% endif %}>Скасовано</option>
+                                </select>
+                            </td>
+                            <td>
+                                {% if booking.notes %}
+                                    <span style="color:#aaa; font-size:0.88rem;" title="{{ booking.notes | e }}">
+                                        {{ booking.notes[:40] }}{% if booking.notes|length > 40 %}…{% endif %}
+                                    </span>
+                                {% else %}
+                                    <span style="color:#555;">—</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div style="text-align:center; padding:3rem; color:#888;">
+            <p>Бронювань не знайдено.</p>
+        </div>
+    {% endif %}
+</div>
+
+{% block scripts %}
+<script>
+    function updateBookingStatus(bookingId, status) {
+        fetch(`/admin/update_booking/${bookingId}/${status}`, { method: 'POST' })
+            .then(r => r.json())
+            .then(d => { if (!d.success) alert('Помилка оновлення статусу'); });
+    }
+</script>
+{% endblock %}
+{% endblock %}

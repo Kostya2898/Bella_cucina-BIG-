@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+{% block title %}Bella Cucina — Справжня італійська кухня{% endblock %}
+{% block content %}
+
+<!-- Hero секція -->
+<div style="text-align:center; padding:3rem 1rem 2rem; animation:fadeIn 0.6s ease;">
+    <div style="font-size:3.5rem; margin-bottom:1rem;">🍝</div>
+    <h1 style="font-size:clamp(2rem,5vw,3.2rem); margin-bottom:1rem; background:linear-gradient(135deg,#d4af37,#f0e68c); background-clip:text; -webkit-background-clip:text; -webkit-text-fill-color:transparent;">
+        Ласкаво просимо до Bella Cucina
+    </h1>
+    <p style="color:#aaa; font-size:clamp(1rem,2.5vw,1.2rem); max-width:600px; margin:0 auto 2.5rem; line-height:1.7;">
+        Справжня італійська кухня, приготована з любов'ю та найсвіжіших інгредієнтів. Відчуйте смак Італії не виходячи з міста.
+    </p>
+    <div style="display:flex; gap:1rem; justify-content:center; flex-wrap:wrap;">
+        <a href="{{ url_for('menu') }}" class="btn" style="font-size:1.05rem; padding:0.9rem 2rem;">🍽️ Переглянути меню</a>
+        <a href="{{ url_for('booking') }}" class="btn btn-secondary" style="font-size:1.05rem; padding:0.9rem 2rem;">📅 Забронювати столик</a>
+    </div>
+</div>
+
+<!-- Переваги -->
+<div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:1.5rem; margin:3rem 0;">
+    <div class="card" style="text-align:center;">
+        <div style="font-size:2.5rem; margin-bottom:1rem;">👨‍🍳</div>
+        <h3>Досвідчені шефи</h3>
+        <p style="color:#aaa; font-size:0.92rem; line-height:1.6;">Наші кухарі навчалися в кращих ресторанах Італії та мають понад 15 років досвіду</p>
+    </div>
+    <div class="card" style="text-align:center;">
+        <div style="font-size:2.5rem; margin-bottom:1rem;">🥬</div>
+        <h3>Свіжі інгредієнти</h3>
+        <p style="color:#aaa; font-size:0.92rem; line-height:1.6;">Щодня привозимо свіжі продукти з місцевих ферм та імпортуємо спеції прямо з Італії</p>
+    </div>
+    <div class="card" style="text-align:center;">
+        <div style="font-size:2.5rem; margin-bottom:1rem;">🍷</div>
+        <h3>Вишукана атмосфера</h3>
+        <p style="color:#aaa; font-size:0.92rem; line-height:1.6;">Елегантний інтер'єр, тихе освітлення та жива музика для ідеального вечора</p>
+    </div>
+    <div class="card" style="text-align:center;">
+        <div style="font-size:2.5rem; margin-bottom:1rem;">⚡</div>
+        <h3>Швидке замовлення</h3>
+        <p style="color:#aaa; font-size:0.92rem; line-height:1.6;">Замовляйте онлайн або бронюйте столик в кілька кліків прямо з телефону</p>
+    </div>
+</div>
+
+<!-- Галерея страв -->
+<div class="content-center" style="margin:2rem 0;">
+    <h2 style="text-align:center; margin-bottom:2rem;">🌟 Популярні страви</h2>
+    <div style="display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:1.5rem;">
+        {% for dish in popular_dishes %}
+        <div class="card" style="cursor:pointer; overflow:hidden; padding:0;" onclick="location.href='{{ url_for('dish_detail', dish_id=dish.id) }}'">
+            {% if dish.image_url %}
+                <img src="{{ dish.image_url }}" alt="{{ dish.name }}"
+                     style="width:100%; height:180px; object-fit:cover; transition:transform 0.3s;"
+                     onmouseover="this.style.transform='scale(1.05)'"
+                     onmouseout="this.style.transform='scale(1)'">
+            {% else %}
+                <div style="width:100%; height:180px; background:rgba(212,175,55,0.1); display:flex; align-items:center; justify-content:center; font-size:2.5rem;">🍽️</div>
+            {% endif %}
+            <div style="padding:1.2rem;">
+                <div class="card-title">{{ dish.name }}</div>
+                <p style="color:#aaa; font-size:0.87rem; margin-bottom:0.75rem; line-height:1.5;">{{ dish.description[:80] if dish.description else '' }}…</p>
+                <div class="card-price">${{ "%.2f"|format(dish.price) }}</div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    <div style="text-align:center; margin-top:2rem;">
+        <a href="{{ url_for('menu') }}" class="btn">Переглянути все меню →</a>
+    </div>
+</div>
+
+<!-- CTA бронювання -->
+<div class="content-center" style="text-align:center; margin:2rem 0; background:linear-gradient(135deg,rgba(212,175,55,0.1),rgba(212,175,55,0.05));">
+    <div style="font-size:2.5rem; margin-bottom:1rem;">📅</div>
+    <h2>Забронюйте столик вже сьогодні</h2>
+    <p style="color:#aaa; margin-bottom:2rem; max-width:500px; margin-left:auto; margin-right:auto; line-height:1.7;">
+        Особливий вечір заслуговує на особливе місце. Забронюйте столик і ми подбаємо про все інше.
+    </p>
+    <a href="{{ url_for('booking') }}" class="btn" style="font-size:1.05rem; padding:0.9rem 2.5rem;">Забронювати зараз</a>
+</div>
+
+{% endblock %}

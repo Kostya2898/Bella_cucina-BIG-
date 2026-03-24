@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+{% block title %}Про нас — Bella Cucina{% endblock %}
+{% block content %}
+
+<div class="content-center" style="margin-bottom:2rem;">
+    <div style="text-align:center; margin-bottom:3rem;">
+        <div style="font-size:3rem; margin-bottom:1rem;">🍝</div>
+        <h1>Про Bella Cucina</h1>
+        <p style="color:#aaa; font-size:1.1rem; max-width:650px; margin:0 auto; line-height:1.8;">
+            Ми — ресторан справжньої італійської кухні, де кожна страва готується з душею та любов'ю до традицій.
+        </p>
+    </div>
+
+    <!-- Наша історія -->
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:3rem; align-items:center; margin-bottom:3rem;">
+        <div>
+            <h2>Наша історія</h2>
+            <p style="color:#aaa; line-height:1.9; margin-bottom:1rem;">
+                Bella Cucina відкрилася у 2015 році з однією простою метою — подарувати гостям справжній смак Італії. Наш засновник, після тривалого навчання у флорентійських кулінарних школах, привіз рецепти, перевірені поколіннями.
+            </p>
+            <p style="color:#aaa; line-height:1.9;">
+                Сьогодні ми пишаємося тисячами щасливих гостей і незмінно дотримуємося одного правила — жодних компромісів у якості.
+            </p>
+        </div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem;">
+            <div class="card" style="text-align:center;">
+                <div style="font-size:2.5rem; color:#d4af37; font-weight:bold;">9+</div>
+                <div style="color:#aaa; font-size:0.9rem; margin-top:0.5rem;">Років досвіду</div>
+            </div>
+            <div class="card" style="text-align:center;">
+                <div style="font-size:2.5rem; color:#d4af37; font-weight:bold;">50+</div>
+                <div style="color:#aaa; font-size:0.9rem; margin-top:0.5rem;">Страв у меню</div>
+            </div>
+            <div class="card" style="text-align:center;">
+                <div style="font-size:2.5rem; color:#d4af37; font-weight:bold;">10k+</div>
+                <div style="color:#aaa; font-size:0.9rem; margin-top:0.5rem;">Задоволених гостей</div>
+            </div>
+            <div class="card" style="text-align:center;">
+                <div style="font-size:2.5rem; color:#d4af37; font-weight:bold;">15+</div>
+                <div style="color:#aaa; font-size:0.9rem; margin-top:0.5rem;">Нагород</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Команда -->
+    <h2 style="text-align:center; margin-bottom:2rem;">👨‍🍳 Наша команда</h2>
+    <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:1.5rem; margin-bottom:3rem;">
+        <div class="card" style="text-align:center;">
+            <div style="font-size:3rem; margin-bottom:1rem;">👨‍🍳</div>
+            <div class="card-title">Марко Россі</div>
+            <div style="color:#d4af37; font-size:0.88rem; margin-bottom:0.75rem;">Шеф-кухар</div>
+            <p style="color:#aaa; font-size:0.88rem; line-height:1.6;">20 років досвіду, навчався у Флоренції та Мілані. Спеціаліст з пасти та рибних страв.</p>
+        </div>
+        <div class="card" style="text-align:center;">
+            <div style="font-size:3rem; margin-bottom:1rem;">👩‍🍳</div>
+            <div class="card-title">Софія Бруно</div>
+            <div style="color:#d4af37; font-size:0.88rem; margin-bottom:0.75rem;">Су-шеф</div>
+            <p style="color:#aaa; font-size:0.88rem; line-height:1.6;">Майстер десертів та випічки. Автор фірмового тірамісу за сімейним рецептом.</p>
+        </div>
+        <div class="card" style="text-align:center;">
+            <div style="font-size:3rem; margin-bottom:1rem;">🍷</div>
+            <div class="card-title">Луки Фераро</div>
+            <div style="color:#d4af37; font-size:0.88rem; margin-bottom:0.75rem;">Сомельє</div>
+            <p style="color:#aaa; font-size:0.88rem; line-height:1.6;">Сертифікований сомельє з підбірки понад 200 вин з усіх регіонів Італії.</p>
+        </div>
+    </div>
+
+    <!-- Години роботи та контакти -->
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:2rem;">
+        <div class="card">
+            <h3 style="color:#d4af37; margin-bottom:1.5rem;">🕐 Години роботи</h3>
+            <div style="display:flex; flex-direction:column; gap:0.75rem;">
+                <div style="display:flex; justify-content:space-between; padding-bottom:0.75rem; border-bottom:1px solid rgba(212,175,55,0.1);">
+                    <span style="color:#aaa;">Понеділок — Четвер</span>
+                    <span>17:00 — 23:00</span>
+                </div>
+                <div style="display:flex; justify-content:space-between; padding-bottom:0.75rem; border-bottom:1px solid rgba(212,175,55,0.1);">
+                    <span style="color:#aaa;">П'ятниця — Субота</span>
+                    <span>17:00 — 00:00</span>
+                </div>
+                <div style="display:flex; justify-content:space-between; padding-bottom:0.75rem; border-bottom:1px solid rgba(212,175,55,0.1);">
+                    <span style="color:#aaa;">Неділя</span>
+                    <span>17:00 — 22:00</span>
+                </div>
+                <div style="display:flex; justify-content:space-between;">
+                    <span style="color:#aaa;">Понеділок (обід)</span>
+                    <span style="color:#ef5350;">Вихідний</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h3 style="color:#d4af37; margin-bottom:1.5rem;">📍 Контакти</h3>
+            <div style="display:flex; flex-direction:column; gap:1rem;">
+                <div>
+                    <div style="color:#aaa; font-size:0.85rem; margin-bottom:0.25rem;">Адреса</div>
+                    <div>вул. Хрещатик, 1, Київ</div>
+                </div>
+                <div>
+                    <div style="color:#aaa; font-size:0.85rem; margin-bottom:0.25rem;">Телефон</div>
+                    <div>+380 44 123 45 67</div>
+                </div>
+                <div>
+                    <div style="color:#aaa; font-size:0.85rem; margin-bottom:0.25rem;">Email</div>
+                    <div>info@bellacucina.com</div>
+                </div>
+                <a href="{{ url_for('booking') }}" class="btn" style="text-align:center; margin-top:0.5rem;">Забронювати столик</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,250 @@
+{% extends "base.html" %}
+{% block title %}Панель адміністратора — Bella Cucina{% endblock %}
+
+{% block content %}
+<div class="content-center">
+    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem; margin-bottom:2rem;">
+        <h1 style="margin:0;">⚙️ Панель адміністратора</h1>
+        <a href="{{ url_for('export_orders') }}" class="btn btn-success" style="padding:0.6rem 1.3rem; font-size:0.9rem;">
+            ⬇️ Експорт Excel
+        </a>
+    </div>
+
+    <!-- Картки статистики -->
+    <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:1.2rem; margin-bottom:2.5rem;">
+        <div class="card" style="text-align:center;">
+            <div style="font-size:1.8rem; margin-bottom:0.4rem;">📦</div>
+            <div style="font-size:2rem; color:#f0e68c; font-weight:bold;">{{ total_orders }}</div>
+            <div style="color:#aaa; font-size:0.82rem; margin-top:0.35rem;">Всього замовлень</div>
+        </div>
+        <div class="card" style="text-align:center;">
+            <div style="font-size:1.8rem; margin-bottom:0.4rem;">💰</div>
+            <div style="font-size:2rem; color:#d4af37; font-weight:bold;">${{ total_revenue }}</div>
+            <div style="color:#aaa; font-size:0.82rem; margin-top:0.35rem;">Загальний дохід</div>
+        </div>
+        <div class="card" style="text-align:center;">
+            <div style="font-size:1.8rem; margin-bottom:0.4rem;">🧾</div>
+            <div style="font-size:2rem; color:#f0e68c; font-weight:bold;">${{ avg_order }}</div>
+            <div style="color:#aaa; font-size:0.82rem; margin-top:0.35rem;">Середній чек</div>
+        </div>
+        <div class="card" style="text-align:center;">
+            <div style="font-size:1.8rem; margin-bottom:0.4rem;">👥</div>
+            <div style="font-size:2rem; color:#f0e68c; font-weight:bold;">{{ total_users }}</div>
+            <div style="color:#aaa; font-size:0.82rem; margin-top:0.35rem;">Користувачів</div>
+            <div style="font-size:0.78rem; color:#81c784; margin-top:0.2rem;">+{{ new_users_week }} за тиждень</div>
+        </div>
+        <div class="card" style="text-align:center;">
+            <div style="font-size:1.8rem; margin-bottom:0.4rem;">📅</div>
+            <div style="font-size:2rem; color:#f0e68c; font-weight:bold;">{{ total_bookings }}</div>
+            <div style="color:#aaa; font-size:0.82rem; margin-top:0.35rem;">Бронювань</div>
+        </div>
+    </div>
+
+    <!-- Графіки -->
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:2rem; margin-bottom:2.5rem;">
+
+        <!-- Дохід за 7 днів -->
+        <div class="card">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.2rem; flex-wrap:wrap; gap:0.5rem;">
+                <h3 style="margin:0; font-size:1rem;">📈 Дохід — 7 днів</h3>
+            </div>
+            <canvas id="weekRevenueChart" height="200"></canvas>
+        </div>
+
+        <!-- Замовлення за 7 днів -->
+        <div class="card">
+            <h3 style="font-size:1rem; margin-bottom:1.2rem;">📦 Замовлення — 7 днів</h3>
+            <canvas id="weekOrdersChart" height="200"></canvas>
+        </div>
+
+        <!-- Дохід за 12 місяців -->
+        <div class="card" style="grid-column:1 / -1;">
+            <h3 style="font-size:1rem; margin-bottom:1.2rem;">📊 Дохід — 12 місяців</h3>
+            <canvas id="monthRevenueChart" height="120"></canvas>
+        </div>
+    </div>
+
+    <!-- Топ страв + статуси -->
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:2rem; margin-bottom:2.5rem;">
+
+        <!-- Топ-5 страв -->
+        <div class="card">
+            <h3 style="font-size:1rem; margin-bottom:1.5rem;">🏆 Топ-5 страв</h3>
+            {% if top_dishes %}
+                <div style="display:flex; flex-direction:column; gap:0.85rem;">
+                    {% for i, dish in top_dishes|enumerate %}
+                    <div>
+                        <div style="display:flex; justify-content:space-between; margin-bottom:0.3rem; font-size:0.9rem;">
+                            <span>
+                                <span style="color:#d4af37; font-weight:bold; margin-right:0.5rem;">#{{ i+1 }}</span>
+                                {{ dish.name }}
+                            </span>
+                            <span style="color:#aaa;">{{ dish.qty }} шт · <span style="color:#d4af37;">${{ dish.rev }}</span></span>
+                        </div>
+                        {% set max_qty = top_dishes[0].qty %}
+                        <div style="height:6px; background:rgba(255,255,255,0.08); border-radius:3px; overflow:hidden;">
+                            <div style="height:100%; width:{{ (dish.qty / max_qty * 100)|int }}%; background:linear-gradient(90deg,#d4af37,#f0e68c); border-radius:3px; transition:width 0.5s;"></div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p style="color:#888; text-align:center; padding:1rem;">Поки немає замовлень</p>
+            {% endif %}
+        </div>
+
+        <!-- Статуси замовлень -->
+        <div class="card">
+            <h3 style="font-size:1rem; margin-bottom:1.2rem;">🔄 Статуси замовлень</h3>
+            {% set os = order_statuses|fromjson %}
+            {% if os %}
+                <canvas id="statusChart" height="220"></canvas>
+            {% else %}
+                <p style="color:#888; text-align:center; padding:2rem;">Замовлень ще немає</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Швидкі дії -->
+    <h2 style="font-size:1.2rem; margin-bottom:1.2rem;">⚡ Швидкі дії</h2>
+    <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:1rem;">
+        <a href="{{ url_for('admin_dishes') }}"   class="btn btn-secondary" style="text-align:center;">🍽️ Меню</a>
+        <a href="{{ url_for('admin_orders') }}"   class="btn btn-secondary" style="text-align:center;">📦 Замовлення</a>
+        <a href="{{ url_for('admin_users') }}"    class="btn btn-secondary" style="text-align:center;">👥 Користувачі</a>
+        <a href="{{ url_for('admin_bookings') }}" class="btn btn-secondary" style="text-align:center;">📅 Бронювання</a>
+        <a href="{{ url_for('admin_promos') }}"   class="btn btn-secondary" style="text-align:center;">🎟️ Промокоди</a>
+        <a href="{{ url_for('qr_menu') }}"        class="btn btn-secondary" style="text-align:center;">📱 QR-меню</a>
+        <a href="{{ url_for('admin_email') }}"    class="btn btn-secondary" style="text-align:center;">📧 Email</a>
+        <a href="{{ url_for('export_orders') }}"  class="btn btn-success"   style="text-align:center;">⬇️ Excel</a>
+
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script>
+    Chart.defaults.color          = '#aaa';
+    Chart.defaults.borderColor    = 'rgba(212,175,55,0.1)';
+    Chart.defaults.font.family    = "'Segoe UI', system-ui, sans-serif";
+
+    const weekLabels   = {{ week_labels|safe }};
+    const weekRevenue  = {{ week_revenue|safe }};
+    const weekOrders   = {{ week_orders|safe }};
+    const monthLabels  = {{ month_labels|safe }};
+    const monthRevenue = {{ month_revenue|safe }};
+    const orderStatuses = {{ order_statuses|safe }};
+
+    // ── Дохід 7 днів ──
+    new Chart(document.getElementById('weekRevenueChart'), {
+        type: 'bar',
+        data: {
+            labels: weekLabels,
+            datasets: [{
+                label: 'Дохід ($)',
+                data: weekRevenue,
+                backgroundColor: 'rgba(212,175,55,0.35)',
+                borderColor: '#d4af37',
+                borderWidth: 2,
+                borderRadius: 6,
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: { legend: { display: false } },
+            scales: {
+                y: { beginAtZero: true, grid: { color: 'rgba(212,175,55,0.08)' } },
+                x: { grid: { display: false } }
+            }
+        }
+    });
+
+    // ── Замовлення 7 днів ──
+    new Chart(document.getElementById('weekOrdersChart'), {
+        type: 'line',
+        data: {
+            labels: weekLabels,
+            datasets: [{
+                label: 'Замовлень',
+                data: weekOrders,
+                borderColor: '#64b5f6',
+                backgroundColor: 'rgba(100,181,246,0.12)',
+                borderWidth: 2,
+                pointBackgroundColor: '#64b5f6',
+                pointRadius: 5,
+                tension: 0.35,
+                fill: true,
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: { legend: { display: false } },
+            scales: {
+                y: { beginAtZero: true, ticks: { stepSize: 1 }, grid: { color: 'rgba(100,181,246,0.08)' } },
+                x: { grid: { display: false } }
+            }
+        }
+    });
+
+    // ── Дохід 12 місяців ──
+    new Chart(document.getElementById('monthRevenueChart'), {
+        type: 'line',
+        data: {
+            labels: monthLabels,
+            datasets: [{
+                label: 'Дохід ($)',
+                data: monthRevenue,
+                borderColor: '#d4af37',
+                backgroundColor: 'rgba(212,175,55,0.1)',
+                borderWidth: 2.5,
+                pointBackgroundColor: '#d4af37',
+                pointRadius: 4,
+                tension: 0.35,
+                fill: true,
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: { legend: { display: false } },
+            scales: {
+                y: { beginAtZero: true, grid: { color: 'rgba(212,175,55,0.08)' } },
+                x: { grid: { display: false } }
+            }
+        }
+    });
+
+    // ── Статуси (пончик) ──
+    const statusCanvas = document.getElementById('statusChart');
+    if (statusCanvas && Object.keys(orderStatuses).length) {
+        const colors = ['#64b5f6','#d4af37','#ff9800','#81c784','#4caf50','#ef5350'];
+        new Chart(statusCanvas, {
+            type: 'doughnut',
+            data: {
+                labels: Object.keys(orderStatuses),
+                datasets: [{
+                    data: Object.values(orderStatuses),
+                    backgroundColor: colors,
+                    borderColor: '#0a0e27',
+                    borderWidth: 3,
+                    hoverOffset: 8,
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: { padding: 16, boxWidth: 14, font: { size: 12 } }
+                    }
+                },
+                cutout: '60%'
+            }
+        });
+    }
+</script>
+<style>
+    @media (max-width: 768px) {
+        div[style*="grid-template-columns:1fr 1fr"] { grid-template-columns: 1fr !important; }
+    }
+</style>
+{% endblock %}

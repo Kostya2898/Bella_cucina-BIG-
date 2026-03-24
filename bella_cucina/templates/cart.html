@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% block title %}Кошик — Bella Cucina{% endblock %}
+{% block content %}
+<div class="content-center">
+    <h1>🛒 Кошик</h1>
+
+    {% if items %}
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Страва</th>
+                        <th>Ціна</th>
+                        <th>Кількість</th>
+                        <th>Сума</th>
+                        <th>Дія</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in items %}
+                        <tr>
+                            <td><a href="{{ url_for('dish_detail', dish_id=item.dish.id) }}" style="color:#d4af37; text-decoration:none; font-weight:500;">{{ item.dish.name }}</a></td>
+                            <td>${{ "%.2f"|format(item.dish.price) }}</td>
+                            <td>{{ item.quantity }}</td>
+                            <td style="color:#f0e68c; font-weight:600;">${{ "%.2f"|format(item.subtotal) }}</td>
+                            <td><a href="{{ url_for('remove_from_cart', dish_id=item.dish.id) }}" class="btn btn-danger btn-small" style="text-decoration:none;">Видалити</a></td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Промокод -->
+        <div style="margin-top:2rem; padding:1.5rem; background:rgba(212,175,55,0.05); border-radius:10px; border:1px solid rgba(212,175,55,0.15);">
+            <h3 style="margin-bottom:1rem; font-size:1rem;">🎟️ Промокод</h3>
+            {% if promo_code %}
+                <div style="display:flex; align-items:center; gap:1rem; flex-wrap:wrap;">
+                    <span style="color:#81c784;">✓ Застосовано: <strong>{{ promo_code }}</strong> (−{{ promo_discount|int }}%)</span>
+                    <a href="{{ url_for('remove_promo') }}" class="btn btn-danger btn-small" style="text-decoration:none;">Видалити</a>
+                </div>
+            {% else %}
+                <form method="POST" action="{{ url_for('apply_promo') }}" style="display:flex; gap:0.75rem; flex-wrap:wrap;">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <input type="text" name="promo_code" placeholder="Введіть промокод" style="max-width:250px; flex:1;">
+                    <button type="submit" class="btn-secondary" style="padding:0.7rem 1.2rem; white-space:nowrap;">Застосувати</button>
+                </form>
+            {% endif %}
+        </div>
+
+        <!-- Підсумок -->
+        <div style="margin-top:1.5rem; padding-top:1.5rem; border-top:1px solid rgba(212,175,55,0.2); text-align:right;">
+            {% if promo_discount %}
+                <div style="color:#aaa; margin-bottom:0.5rem;">Підсума: ${{ "%.2f"|format(total) }}</div>
+                <div style="color:#81c784; margin-bottom:0.5rem;">Знижка ({{ promo_discount|int }}%): −${{ "%.2f"|format(total - total_after) }}</div>
+            {% endif %}
+            <h2 style="color:#f0e68c;">Разом: ${{ "%.2f"|format(total_after) }}</h2>
+            <div style="display:flex; gap:1rem; justify-content:flex-end; flex-wrap:wrap; margin-top:1.5rem;">
+                <a href="{{ url_for('menu') }}" class="btn btn-secondary">← Продовжити покупки</a>
+                <a href="{{ url_for('checkout') }}" class="btn btn-success">Оформити замовлення →</a>
+            </div>
+        </div>
+    {% else %}
+        <div style="text-align:center; padding:3rem; color:#888;">
+            <div style="font-size:4rem; margin-bottom:1rem;">🛒</div>
+            <p style="font-size:1.1rem; margin-bottom:2rem;">Ваш кошик порожній.</p>
+            <a href="{{ url_for('menu') }}" class="btn">Переглянути меню</a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% block title %}Управління замовленнями — Bella Cucina{% endblock %}
+{% block content %}
+<div class="content-center">
+    <a href="{{ url_for('admin_dashboard') }}" class="back-link">← Назад до адмінки</a>
+    <h1>📦 Управління замовленнями</h1>
+
+    {% if orders %}
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>№</th>
+                        <th>Клієнт</th>
+                        <th>Сума</th>
+                        <th>Поз.</th>
+                        <th>Дата</th>
+                        <th>Статус</th>
+                        <th>Дія</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for order in orders %}
+                        <tr>
+                            <td><a href="{{ url_for('order_detail', order_id=order.id) }}" style="color:#d4af37; text-decoration:none; font-weight:600;">#{{ order.id }}</a></td>
+                            <td>{{ order.customer.username }}</td>
+                            <td style="color:#f0e68c;">${{ "%.2f"|format(order.total_price) }}</td>
+                            <td>{{ order.items|length }}</td>
+                            <td style="white-space:nowrap;">{{ order.created_at.strftime('%d.%m.%Y %H:%M') }}</td>
+                            <td>
+                                <select onchange="updateOrderStatus({{ order.id }}, this.value)"
+                                    style="background:rgba(212,175,55,0.1); border:1px solid rgba(212,175,55,0.3); color:#e0e0e0; padding:0.35rem 0.5rem; border-radius:5px; font-size:0.85rem; width:auto;">
+                                    <option value="pending"   {% if order.status=='pending' %}selected{% endif %}>В очікуванні</option>
+                                    <option value="confirmed" {% if order.status=='confirmed' %}selected{% endif %}>Підтверджено</option>
+                                    <option value="preparing" {% if order.status=='preparing' %}selected{% endif %}>Готується</option>
+                                    <option value="ready"     {% if order.status=='ready' %}selected{% endif %}>Готово</option>
+                                    <option value="delivered" {% if order.status=='delivered' %}selected{% endif %}>Доставлено</option>
+                                    <option value="cancelled" {% if order.status=='cancelled' %}selected{% endif %}>Скасовано</option>
+                                </select>
+                            </td>
+                            <td>
+                                <a href="{{ url_for('order_detail', order_id=order.id) }}" class="btn btn-small">Деталі</a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div style="text-align:center; padding:3rem; color:#888;">
+            <p>Замовлень поки немає.</p>
+        </div>
+    {% endif %}
+</div>
+
+{% block scripts %}
+<script>
+    function updateOrderStatus(orderId, status) {
+        fetch(`/admin/update_order/${orderId}/${status}`, { method: 'POST' })
+            .then(r => r.json())
+            .then(d => { if (!d.success) alert('Помилка оновлення статусу'); });
+    }
+</script>
+{% endblock %}
+{% endblock %}

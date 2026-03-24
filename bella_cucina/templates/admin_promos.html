@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+{% block title %}Промокоди — Bella Cucina{% endblock %}
+{% block content %}
+<div class="content-center">
+    <a href="{{ url_for('admin_dashboard') }}" class="back-link">← Назад до адмінки</a>
+    <h1>🎟️ Управління промокодами</h1>
+
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:2rem;">
+        <!-- Форма створення -->
+        <div class="card">
+            <h3 style="color:#d4af37; margin-bottom:1.5rem;">➕ Новий промокод</h3>
+            <form method="POST">
+                {{ form.hidden_tag() }}
+                <div class="form-group">
+                    <label>{{ form.code.label.text }}</label>
+                    {{ form.code(placeholder="Наприклад: ЛІТО2024") }}
+                    {% for e in form.code.errors %}<div class="form-error">{{ e }}</div>{% endfor %}
+                </div>
+                <div class="form-group">
+                    <label>{{ form.discount.label.text }}</label>
+                    {{ form.discount(placeholder="10") }}
+                    {% for e in form.discount.errors %}<div class="form-error">{{ e }}</div>{% endfor %}
+                </div>
+                <div class="form-group">
+                    <label>{{ form.uses_left.label.text }}</label>
+                    {{ form.uses_left(placeholder="0 = необмежено") }}
+                </div>
+                <button type="submit" style="width:100%;">➕ Створити</button>
+            </form>
+        </div>
+
+        <!-- Список промокодів -->
+        <div>
+            <h3 style="color:#d4af37; margin-bottom:1.2rem;">📋 Існуючі промокоди</h3>
+            {% if promos %}
+                <div style="display:flex; flex-direction:column; gap:0.75rem; max-height:500px; overflow-y:auto;">
+                    {% for promo in promos %}
+                        <div class="card" style="padding:1rem;">
+                            <div style="display:flex; justify-content:space-between; align-items:center; gap:0.75rem; flex-wrap:wrap;">
+                                <div>
+                                    <div style="font-weight:bold; color:#f0e68c; font-size:1rem; letter-spacing:1px;">{{ promo.code }}</div>
+                                    <div style="font-size:0.85rem; color:#aaa; margin-top:0.25rem;">
+                                        Знижка: <span style="color:#d4af37;">{{ promo.discount|int }}%</span>
+                                        &nbsp;·&nbsp;
+                                        {% if promo.uses_left is none %}Необмежено
+                                        {% else %}Залишилось: {{ promo.uses_left }}
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <div style="display:flex; gap:0.5rem; align-items:center;">
+                                    <span id="status-{{ promo.id }}" style="padding:0.25rem 0.75rem; border-radius:20px; font-size:0.8rem; font-weight:600;
+                                        background:{% if promo.is_active %}rgba(76,175,80,0.2){% else %}rgba(244,67,54,0.2){% endif %};
+                                        color:{% if promo.is_active %}#81c784{% else %}#ef5350{% endif %};">
+                                        {% if promo.is_active %}Активний{% else %}Неактивний{% endif %}
+                                    </span>
+                                    <button onclick="togglePromo({{ promo.id }})" class="btn-small btn-secondary">Вкл/Викл</button>
+                                    <button onclick="deletePromo({{ promo.id }})" class="btn-small btn-danger">✕</button>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p style="color:#888;">Промокодів ще немає.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+{% block scripts %}
+<script>
+    function togglePromo(id) {
+        fetch(`/admin/toggle_promo/${id}`, { method: 'POST' })
+            .then(r => r.json())
+            .then(d => {
+                if (d.success) {
+                    const el = document.getElementById(`status-${id}`);
+                    el.textContent = d.is_active ? 'Активний' : 'Неактивний';
+                    el.style.background = d.is_active ? 'rgba(76,175,80,0.2)' : 'rgba(244,67,54,0.2)';
+                    el.style.color = d.is_active ? '#81c784' : '#ef5350';
+                }
+            });
+    }
+    function deletePromo(id) {
+        if (confirm('Видалити цей промокод?')) {
+            fetch(`/admin/delete_promo/${id}`, { method: 'POST' })
+                .then(r => r.json())
+                .then(d => { if (d.success) location.reload(); });
+        }
+    }
+</script>
+<style>
+    @media (max-width:700px) { div[style*="grid-template-columns:1fr 1fr"]{grid-template-columns:1fr !important;} }
+</style>
+{% endblock %}
+{% endblock %}

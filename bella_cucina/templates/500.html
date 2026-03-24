@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}500 — Помилка сервера{% endblock %}
+{% block content %}
+<div style="text-align:center; padding:4rem 1rem;">
+    <div style="font-size:6rem; margin-bottom:1rem; line-height:1;">🍳</div>
+    <h1 style="font-size:clamp(3rem,10vw,6rem); margin-bottom:0.5rem; background:linear-gradient(135deg,#d4af37,#f0e68c); background-clip:text; -webkit-background-clip:text; -webkit-text-fill-color:transparent;">500</h1>
+    <h2 style="margin-bottom:1rem; color:#aaa;">Помилка сервера</h2>
+    <p style="color:#888; max-width:450px; margin:0 auto 2.5rem; line-height:1.7;">
+        Щось пішло не так на нашій кухні 🍳 Ми вже знаємо про проблему і виправляємо її. Спробуйте пізніше.
+    </p>
+    <div style="display:flex; gap:1rem; justify-content:center; flex-wrap:wrap;">
+        <a href="{{ url_for('index') }}" class="btn">На головну</a>
+        <a href="{{ url_for('menu') }}" class="btn btn-secondary">До меню</a>
+    </div>
+</div>
+{% endblock %}

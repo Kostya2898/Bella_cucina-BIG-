@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Bella Cucina{% endblock %}</title>
+    <style>
+        *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+        html { scroll-behavior:smooth; }
+        body {
+            font-family:'Segoe UI', system-ui, sans-serif;
+            background:linear-gradient(135deg,#0a0e27 0%,#1a1f3a 25%,#0d1929 50%,#1a1f3a 75%,#0a0e27 100%);
+            background-attachment:fixed;
+            min-height:100vh; color:#e0e0e0; position:relative; overflow-x:hidden;
+        }
+        .page-wrapper { animation:fadeIn 0.4s ease; }
+        @keyframes fadeIn { from{opacity:0;transform:translateY(12px);} to{opacity:1;transform:translateY(0);} }
+        .starfield { position:fixed; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:1; }
+        .star { position:absolute; background:white; border-radius:50%; opacity:0.8; animation:fall linear infinite; }
+        @keyframes fall { 0%{transform:translateY(-10vh);opacity:1;} 100%{transform:translateY(110vh) translateX(15px);opacity:0;} }
+
+        /* ── Місяць ── */
+        .moon {
+            position:fixed; top:80px; right:50px; width:75px; height:75px;
+            border-radius:50%; pointer-events:none; z-index:5;
+            background:radial-gradient(circle at 32% 32%, #fffde7, #f5e064 30%, #d4af37 60%, #9a7a1a 100%);
+            box-shadow: 0 0 0 2px rgba(212,175,55,0.15),
+                        0 0 25px rgba(212,175,55,0.5),
+                        0 0 60px rgba(212,175,55,0.2),
+                        0 0 100px rgba(212,175,55,0.08),
+                        inset -10px -5px 0 rgba(0,0,0,0.18);
+            animation: moonGlow 3.5s ease-in-out infinite;
+        }
+        .moon::before {
+            content:''; position:absolute;
+            width:13px; height:13px; border-radius:50%;
+            background:rgba(0,0,0,0.13);
+            top:16px; left:20px;
+            box-shadow: 18px 20px 0 5px rgba(0,0,0,0.08);
+        }
+        .moon::after {
+            content:''; position:absolute;
+            width:8px; height:8px; border-radius:50%;
+            background:rgba(0,0,0,0.1);
+            top:42px; left:42px;
+        }
+        @keyframes moonGlow {
+            0%,100% {
+                box-shadow: 0 0 0 2px rgba(212,175,55,0.15),
+                            0 0 25px rgba(212,175,55,0.5),
+                            0 0 60px rgba(212,175,55,0.2),
+                            0 0 100px rgba(212,175,55,0.08),
+                            inset -10px -5px 0 rgba(0,0,0,0.18);
+            }
+            50% {
+                box-shadow: 0 0 0 3px rgba(212,175,55,0.25),
+                            0 0 40px rgba(212,175,55,0.7),
+                            0 0 90px rgba(212,175,55,0.35),
+                            0 0 140px rgba(212,175,55,0.12),
+                            inset -10px -5px 0 rgba(0,0,0,0.18);
+            }
+        }
+        @media (max-width:768px) { .moon { width:48px; height:48px; top:70px; right:14px; } }
+        .container-wrapper { position:relative; z-index:3; min-height:100vh; display:flex; flex-direction:column; }
+        main { flex:1; max-width:1200px; margin:0 auto; padding:2.5rem 1.5rem; width:100%; }
+        header {
+            background:rgba(10,14,39,0.92); backdrop-filter:blur(12px);
+            border-bottom:1px solid rgba(212,175,55,0.2);
+            padding:0.85rem 0; position:sticky; top:0; z-index:1000;
+        }
+        .header-content { max-width:1200px; margin:0 auto; padding:0 1.5rem; display:flex; justify-content:space-between; align-items:center; gap:1rem; }
+        .logo { font-size:1.7rem; font-weight:bold; background:linear-gradient(135deg,#d4af37,#f0e68c); background-clip:text; -webkit-background-clip:text; -webkit-text-fill-color:transparent; letter-spacing:2px; white-space:nowrap; text-decoration:none; }
+        nav { display:flex; gap:0.3rem; align-items:center; flex-wrap:wrap; }
+        nav a { color:#e0e0e0; text-decoration:none; font-size:0.92rem; transition:all 0.25s; padding:0.45rem 0.9rem; border-radius:6px; }
+        nav a:hover { color:#d4af37; background:rgba(212,175,55,0.12); }
+        .nav-btn { background:linear-gradient(135deg,#d4af37,#f0e68c); color:#1a1a1a !important; border:none; padding:0.45rem 1.1rem; border-radius:6px; font-weight:600; cursor:pointer; font-size:0.9rem; transition:all 0.25s; text-decoration:none; display:inline-block; }
+        .nav-btn:hover { transform:translateY(-2px); box-shadow:0 4px 15px rgba(212,175,55,0.4); }
+        .nav-btn-ghost { background:rgba(212,175,55,0.1) !important; color:#d4af37 !important; border:1px solid rgba(212,175,55,0.35) !important; }
+        .hamburger { display:none; flex-direction:column; justify-content:space-between; width:28px; height:20px; cursor:pointer; background:none; border:none; padding:0; z-index:1100; }
+        .hamburger span { display:block; height:2px; width:100%; background:#d4af37; border-radius:2px; transition:all 0.3s; }
+        .hamburger.open span:nth-child(1) { transform:translateY(9px) rotate(45deg); }
+        .hamburger.open span:nth-child(2) { opacity:0; }
+        .hamburger.open span:nth-child(3) { transform:translateY(-9px) rotate(-45deg); }
+        .mobile-nav { display:none; flex-direction:column; gap:0.4rem; background:rgba(10,14,39,0.98); backdrop-filter:blur(12px); border-top:1px solid rgba(212,175,55,0.2); padding:1rem 1.5rem 1.5rem; position:absolute; top:100%; left:0; width:100%; z-index:999; animation:slideDown 0.25s ease; }
+        .mobile-nav.open { display:flex; }
+        @keyframes slideDown { from{opacity:0;transform:translateY(-8px);} to{opacity:1;transform:translateY(0);} }
+        .mobile-nav a, .mobile-nav .nav-btn { padding:0.75rem 1rem; border-radius:6px; font-size:1rem; text-align:center; width:100%; }
+        footer { background:rgba(10,14,39,0.92); border-top:1px solid rgba(212,175,55,0.15); padding:2rem 1.5rem; text-align:center; color:#666; font-size:0.88rem; margin-top:auto; }
+        footer a { color:#d4af37; text-decoration:none; }
+        footer a:hover { text-decoration:underline; }
+        .alert { padding:0.9rem 1.2rem; margin:0.75rem 0; border-radius:8px; border-left:4px solid; font-size:0.95rem; }
+        .alert-success { background:rgba(76,175,80,0.15);  border-left-color:#4caf50; color:#81c784; }
+        .alert-danger  { background:rgba(244,67,54,0.15);  border-left-color:#f44336; color:#ef5350; }
+        .alert-info    { background:rgba(33,150,243,0.15); border-left-color:#2196f3; color:#64b5f6; }
+        button, .btn {
+            background:linear-gradient(135deg,#d4af37,#f0e68c);
+            color:#1a1a1a; border:none; padding:0.8rem 1.5rem; border-radius:8px;
+            font-weight:600; cursor:pointer; font-size:0.95rem;
+            display:inline-block; text-decoration:none;
+            position:relative; overflow:hidden;
+            transition:transform 0.25s cubic-bezier(0.34,1.56,0.64,1),
+                        box-shadow 0.25s ease,
+                        filter 0.25s ease;
+        }
+        button:hover, .btn:hover {
+            transform:translateY(-4px) scale(1.05);
+            box-shadow:0 10px 30px rgba(212,175,55,0.55), 0 4px 10px rgba(0,0,0,0.25);
+            filter:brightness(1.08);
+        }
+        button:active, .btn:active {
+            transform:translateY(1px) scale(0.97) !important;
+            box-shadow:0 2px 8px rgba(212,175,55,0.3) !important;
+            filter:brightness(0.95) !important;
+            transition:transform 0.08s, box-shadow 0.08s, filter 0.08s;
+        }
+        /* ripple */
+        .btn-ripple {
+            position:absolute; border-radius:50%;
+            background:rgba(255,255,255,0.35);
+            transform:scale(0); animation:rippleAnim 0.55s linear;
+            pointer-events:none;
+        }
+        @keyframes rippleAnim { to { transform:scale(4); opacity:0; } }
+        .btn-danger   { background:linear-gradient(135deg,#c62828,#ef5350) !important; color:#fff !important; }
+        .btn-danger:hover { box-shadow:0 10px 30px rgba(244,67,54,0.5) !important; }
+        .btn-success  { background:linear-gradient(135deg,#2e7d32,#66bb6a) !important; color:#fff !important; }
+        .btn-success:hover { box-shadow:0 10px 30px rgba(76,175,80,0.5) !important; }
+        .btn-secondary { background:rgba(212,175,55,0.12) !important; color:#d4af37 !important; border:1px solid rgba(212,175,55,0.35) !important; }
+        .btn-secondary:hover { background:rgba(212,175,55,0.25) !important; box-shadow:0 10px 25px rgba(212,175,55,0.25) !important; filter:none !important; }
+        .btn-small { padding:0.35rem 0.8rem !important; font-size:0.82rem !important; border-radius:5px !important; }
+        input, textarea, select { background:rgba(255,255,255,0.05); border:1px solid rgba(212,175,55,0.3); color:#e0e0e0; padding:0.8rem 1rem; border-radius:8px; width:100%; font-size:0.95rem; transition:border-color 0.25s; }
+        input:focus, textarea:focus, select:focus { outline:none; border-color:#d4af37; background:rgba(212,175,55,0.05); }
+        select option { background:#1a1f3a; }
+        .form-group { margin-bottom:1.2rem; }
+        .form-group label { display:block; margin-bottom:0.45rem; color:#d4af37; font-size:0.88rem; font-weight:500; }
+        .form-error { color:#ef5350; font-size:0.83rem; margin-top:0.3rem; }
+        .content-center { background:linear-gradient(135deg,rgba(26,31,58,0.65) 0%,rgba(20,25,45,0.85) 50%,rgba(26,31,58,0.65) 100%); border-radius:14px; padding:2.5rem; border:1px solid rgba(212,175,55,0.18); backdrop-filter:blur(10px); }
+        .grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:1.8rem; margin-top:2rem; }
+        .card { background:rgba(26,31,58,0.55); border:1px solid rgba(212,175,55,0.18); border-radius:10px; padding:1.5rem; transition:all 0.3s; }
+        .card:hover { transform:translateY(-5px); border-color:rgba(212,175,55,0.5); box-shadow:0 10px 30px rgba(0,0,0,0.3); }
+        .card-title { font-size:1.05rem; font-weight:700; color:#f0e68c; margin-bottom:0.5rem; }
+        .card-price { font-size:1.25rem; font-weight:700; color:#d4af37; }
+        .table-wrap { overflow-x:auto; -webkit-overflow-scrolling:touch; }
+        table { width:100%; border-collapse:collapse; margin-top:1rem; min-width:500px; }
+        th { background:rgba(212,175,55,0.1); color:#d4af37; padding:0.9rem 1rem; text-align:left; border-bottom:1px solid rgba(212,175,55,0.25); font-size:0.88rem; white-space:nowrap; }
+        td { padding:0.85rem 1rem; border-bottom:1px solid rgba(255,255,255,0.05); font-size:0.93rem; }
+        tr:hover td { background:rgba(212,175,55,0.04); }
+        .status-badge { padding:0.3rem 0.85rem; border-radius:20px; font-size:0.8rem; font-weight:600; display:inline-block; white-space:nowrap; }
+        .status-confirmed { background:rgba(76,175,80,0.2);  color:#81c784; }
+        .status-pending   { background:rgba(33,150,243,0.2); color:#64b5f6; }
+        .status-cancelled { background:rgba(244,67,54,0.2);  color:#ef5350; }
+        .status-preparing { background:rgba(255,193,7,0.2);  color:#ffd54f; }
+        .status-ready     { background:rgba(76,175,80,0.2);  color:#81c784; }
+        .status-delivered { background:rgba(76,175,80,0.2);  color:#81c784; }
+        h1 { color:#f0e68c; margin-bottom:1.5rem; font-size:clamp(1.5rem,3vw,2.2rem); }
+        h2 { color:#f0e68c; margin-bottom:1.2rem; font-size:clamp(1.2rem,2.5vw,1.7rem); }
+        h3 { color:#f0e68c; margin-bottom:1rem; font-size:clamp(1rem,2vw,1.3rem); }
+        .back-link { color:#d4af37; text-decoration:none; font-size:0.9rem; display:inline-block; margin-bottom:1.5rem; }
+        .back-link:hover { opacity:0.75; }
+        /* Зірки рейтингу */
+        .stars { color:#d4af37; font-size:1.1rem; letter-spacing:2px; }
+        .stars-sm { color:#d4af37; font-size:0.9rem; }
+        @media (max-width:768px) {
+            .hamburger { display:flex; }
+            nav { display:none; }
+            .header-content { position:relative; }
+            main { padding:1.5rem 1rem; }
+            .content-center { padding:1.5rem 1.2rem; }
+            .grid { grid-template-columns:1fr; gap:1.2rem; }
+        }
+        @media (max-width:480px) {
+            .logo { font-size:1.3rem; }
+            .content-center { padding:1.2rem 1rem; border-radius:10px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="starfield" id="starfield"></div>
+    <div class="moon" id="moon"></div>
+    <div class="container-wrapper">
+        <header>
+            <div class="header-content">
+                <a href="{{ url_for('index') }}" class="logo">✦ Bella Cucina ✦</a>
+                <nav>
+                    <a href="{{ url_for('index') }}">Головна</a>
+                    <a href="{{ url_for('menu') }}">Меню</a>
+                    <a href="{{ url_for('about') }}">Про нас</a>
+                    {% if current_user.is_authenticated %}
+                        <a href="{{ url_for('cart') }}">🛒 Кошик</a>
+                        <a href="{{ url_for('orders') }}">Замовлення</a>
+                        <a href="{{ url_for('bookings') }}">Бронювання</a>
+                        <a href="{{ url_for('profile') }}">👤 {{ current_user.username }}</a>
+                        {% if current_user.is_admin %}
+                            <a href="{{ url_for('admin_dashboard') }}" style="color:#d4af37;">Адмін</a>
+                        {% endif %}
+                        <a href="{{ url_for('logout') }}" class="nav-btn nav-btn-ghost">Вихід</a>
+                    {% else %}
+                        <a href="{{ url_for('login') }}" class="nav-btn nav-btn-ghost">Вхід</a>
+                        <a href="{{ url_for('register') }}" class="nav-btn">Реєстрація</a>
+                    {% endif %}
+                </nav>
+                <button class="hamburger" id="hamburger" aria-label="Меню">
+                    <span></span><span></span><span></span>
+                </button>
+            </div>
+            <div class="mobile-nav" id="mobileNav">
+                <a href="{{ url_for('index') }}">Головна</a>
+                <a href="{{ url_for('menu') }}">Меню</a>
+                <a href="{{ url_for('about') }}">Про нас</a>
+                {% if current_user.is_authenticated %}
+                    <a href="{{ url_for('cart') }}">🛒 Кошик</a>
+                    <a href="{{ url_for('orders') }}">Замовлення</a>
+                    <a href="{{ url_for('bookings') }}">Бронювання</a>
+                    <a href="{{ url_for('profile') }}">👤 Профіль</a>
+                    {% if current_user.is_admin %}
+                        <a href="{{ url_for('admin_dashboard') }}" style="color:#d4af37;">Адмін</a>
+                    {% endif %}
+                    <a href="{{ url_for('logout') }}" class="nav-btn nav-btn-ghost">Вихід</a>
+                {% else %}
+                    <a href="{{ url_for('login') }}" class="nav-btn nav-btn-ghost">Вхід</a>
+                    <a href="{{ url_for('register') }}" class="nav-btn">Реєстрація</a>
+                {% endif %}
+            </div>
+        </header>
+
+        <main class="page-wrapper">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }}">{{ message }}</div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+            {% block content %}{% endblock %}
+        </main>
+
+        <footer>
+            <p style="font-size:1rem; color:#d4af37; margin-bottom:0.75rem;">✦ Bella Cucina ✦</p>
+            <p>Справжня італійська кухня в серці міста</p>
+            <p style="margin-top:0.75rem;">
+                <a href="{{ url_for('menu') }}">Меню</a> &nbsp;·&nbsp;
+                <a href="{{ url_for('about') }}">Про нас</a> &nbsp;·&nbsp;
+                <a href="{{ url_for('booking') }}">Бронювання</a> &nbsp;·&nbsp;
+                <a href="{{ url_for('qr_menu') }}">QR-меню</a>
+            </p>
+            <p style="margin-top:1rem;">&copy; 2026 Bella Cucina. Всі права захищені.</p>
+        </footer>
+    </div>
+
+    <script>
+        function createStars() {
+            const sf = document.getElementById('starfield');
+            for (let i = 0; i < 50; i++) {
+                const s = document.createElement('div');
+                s.className = 'star';
+                const size = (Math.random() * 2 + 1) + 'px';
+                s.style.cssText = `left:${Math.random()*100}%;top:${Math.random()*-50}%;width:${size};height:${size};animation-duration:${Math.random()*4+3}s;animation-delay:${Math.random()*3}s;`;
+                sf.appendChild(s);
+            }
+        }
+        createStars();
+        setInterval(createStars, 6000);
+
+        // Ripple ефект на всіх кнопках
+        document.addEventListener('click', function(e) {
+            const btn = e.target.closest('button, .btn, a.btn, input[type="submit"]');
+            if (!btn) return;
+            const r = document.createElement('span');
+            r.className = 'btn-ripple';
+            const rect = btn.getBoundingClientRect();
+            const size = Math.max(rect.width, rect.height);
+            r.style.cssText = `width:${size}px;height:${size}px;left:${e.clientX-rect.left-size/2}px;top:${e.clientY-rect.top-size/2}px;`;
+            btn.appendChild(r);
+            r.addEventListener('animationend', () => r.remove());
+        });
+        const hamburger = document.getElementById('hamburger');
+        const mobileNav = document.getElementById('mobileNav');
+        hamburger.addEventListener('click', () => {
+            hamburger.classList.toggle('open');
+            mobileNav.classList.toggle('open');
+        });
+        mobileNav.querySelectorAll('a').forEach(a => a.addEventListener('click', () => {
+            hamburger.classList.remove('open');
+            mobileNav.classList.remove('open');
+        }));
+    </script>
+
+    <!-- ── AI Чат-асистент ── -->
+    <style>
+        #ai-chat-btn {
+            position:fixed; bottom:2rem; right:2rem; z-index:9000;
+            width:58px; height:58px; border-radius:50%;
+            background:linear-gradient(135deg,#d4af37,#f0e68c);
+            border:none; cursor:pointer; font-size:1.6rem;
+            box-shadow:0 4px 20px rgba(212,175,55,0.5);
+            transition:all 0.3s; display:flex; align-items:center; justify-content:center;
+        }
+        #ai-chat-btn:hover { transform:scale(1.1); box-shadow:0 6px 28px rgba(212,175,55,0.7); }
+        #ai-chat-box {
+            position:fixed; bottom:6.5rem; right:2rem; z-index:9000;
+            width:360px; max-width:calc(100vw - 2rem);
+            background:#0f1430; border:1px solid rgba(212,175,55,0.3);
+            border-radius:16px; overflow:hidden;
+            box-shadow:0 8px 40px rgba(0,0,0,0.6);
+            display:none; flex-direction:column;
+            animation:chatIn 0.25s ease;
+        }
+        @keyframes chatIn { from{opacity:0;transform:translateY(12px) scale(0.97);} to{opacity:1;transform:translateY(0) scale(1);} }
+        #ai-chat-box.open { display:flex; }
+        .ai-chat-header {
+            background:linear-gradient(135deg,#1a1f3a,#0f1430);
+            border-bottom:1px solid rgba(212,175,55,0.2);
+            padding:0.9rem 1.1rem; display:flex; align-items:center; gap:0.75rem;
+        }
+        .ai-chat-avatar { font-size:1.4rem; }
+        .ai-chat-title { font-weight:bold; color:#f0e68c; font-size:0.95rem; }
+        .ai-chat-sub { color:#888; font-size:0.78rem; margin-top:0.1rem; }
+        .ai-chat-close { margin-left:auto; background:none; border:none; color:#888; font-size:1.2rem; cursor:pointer; padding:0.2rem 0.4rem; border-radius:4px; transition:color 0.2s; }
+        .ai-chat-close:hover { color:#f0e68c; }
+        #ai-chat-messages {
+            height:320px; overflow-y:auto; padding:1rem;
+            display:flex; flex-direction:column; gap:0.75rem;
+            scrollbar-width:thin; scrollbar-color:rgba(212,175,55,0.3) transparent;
+        }
+        .msg { max-width:82%; padding:0.65rem 0.95rem; border-radius:12px; font-size:0.88rem; line-height:1.5; word-break:break-word; }
+        .msg-ai { background:rgba(212,175,55,0.12); border:1px solid rgba(212,175,55,0.2); color:#e0e0e0; align-self:flex-start; border-bottom-left-radius:4px; }
+        .msg-user { background:linear-gradient(135deg,#d4af37,#c9a227); color:#1a1a1a; font-weight:500; align-self:flex-end; border-bottom-right-radius:4px; }
+        .msg-typing { display:flex; gap:5px; align-items:center; padding:0.65rem 0.95rem; }
+        .msg-typing span { width:7px; height:7px; background:#d4af37; border-radius:50%; animation:typing 1.2s infinite; }
+        .msg-typing span:nth-child(2) { animation-delay:0.2s; }
+        .msg-typing span:nth-child(3) { animation-delay:0.4s; }
+        @keyframes typing { 0%,60%,100%{transform:translateY(0);opacity:0.4;} 30%{transform:translateY(-6px);opacity:1;} }
+        .ai-chat-input-row {
+            display:flex; gap:0.5rem; padding:0.75rem;
+            border-top:1px solid rgba(212,175,55,0.15);
+            background:rgba(10,14,39,0.5);
+        }
+        #ai-chat-input {
+            flex:1; background:rgba(255,255,255,0.06); border:1px solid rgba(212,175,55,0.25);
+            border-radius:8px; padding:0.6rem 0.8rem; color:#e0e0e0; font-size:0.88rem;
+            outline:none; resize:none; font-family:inherit;
+            transition:border-color 0.2s;
+        }
+        #ai-chat-input:focus { border-color:rgba(212,175,55,0.6); }
+        #ai-chat-send {
+            background:linear-gradient(135deg,#d4af37,#f0e68c); color:#1a1a1a;
+            border:none; border-radius:8px; padding:0 0.9rem; cursor:pointer;
+            font-size:1rem; font-weight:bold; transition:all 0.2s; white-space:nowrap;
+        }
+        #ai-chat-send:hover { transform:scale(1.05); }
+        #ai-chat-send:disabled { opacity:0.5; cursor:not-allowed; transform:none; }
+        .ai-quick-btns { display:flex; flex-wrap:wrap; gap:0.4rem; margin-top:0.4rem; }
+        .ai-quick-btn {
+            background:rgba(212,175,55,0.1); border:1px solid rgba(212,175,55,0.25);
+            color:#d4af37; border-radius:20px; padding:0.3rem 0.75rem;
+            font-size:0.78rem; cursor:pointer; transition:all 0.2s; white-space:nowrap;
+        }
+        .ai-quick-btn:hover { background:rgba(212,175,55,0.2); }
+    </style>
+
+    <button id="ai-chat-btn" onclick="toggleChat()" title="AI Асистент">🍽️</button>
+
+    <div id="ai-chat-box">
+        <div class="ai-chat-header">
+            <div class="ai-chat-avatar">👨‍🍳</div>
+            <div>
+                <div class="ai-chat-title">Шеф-асистент Bella Cucina</div>
+                <div class="ai-chat-sub">Допоможу обрати страву ✨</div>
+            </div>
+            <button class="ai-chat-close" onclick="toggleChat()">✕</button>
+        </div>
+        <div id="ai-chat-messages"></div>
+        <div class="ai-chat-input-row">
+            <textarea id="ai-chat-input" rows="1" placeholder="Запитайте про страви..."></textarea>
+            <button id="ai-chat-send" onclick="sendMessage()">➤</button>
+        </div>
+    </div>
+
+    <script>
+        const MENU_CONTEXT = {{ menu_context | tojson | safe }};
+        let chatHistory = [];
+        let chatOpened = false;
+
+        function toggleChat() {
+            const box = document.getElementById('ai-chat-box');
+            box.classList.toggle('open');
+            if (box.classList.contains('open') && !chatOpened) {
+                chatOpened = true;
+                appendMsg('ai', 'Вітаю! Я ваш персональний шеф-асистент 👨‍🍳\nЧим можу допомогти? Розкажіть що ви любите — і я підберу ідеальну страву!');
+                const qDiv = document.createElement('div');
+                qDiv.className = 'ai-quick-btns';
+                ['Що порекомендуєте?','Легкі страви','Щось солодке','Є вегетаріанське?','Найпопулярніше'].forEach(q => {
+                    const b = document.createElement('button');
+                    b.className = 'ai-quick-btn';
+                    b.textContent = q;
+                    b.onclick = () => { document.getElementById('ai-chat-input').value = q; sendMessage(); };
+                    qDiv.appendChild(b);
+                });
+                document.getElementById('ai-chat-messages').appendChild(qDiv);
+                scrollChat();
+            }
+            if (box.classList.contains('open')) {
+                setTimeout(() => document.getElementById('ai-chat-input').focus(), 200);
+            }
+        }
+
+        function appendMsg(role, text) {
+            const msgs = document.getElementById('ai-chat-messages');
+            const div = document.createElement('div');
+            div.className = 'msg msg-' + role;
+            div.textContent = text;
+            msgs.appendChild(div);
+            scrollChat();
+            return div;
+        }
+
+        function scrollChat() {
+            const msgs = document.getElementById('ai-chat-messages');
+            msgs.scrollTop = msgs.scrollHeight;
+        }
+
+        function showTyping() {
+            const msgs = document.getElementById('ai-chat-messages');
+            const div = document.createElement('div');
+            div.className = 'msg msg-ai msg-typing';
+            div.id = 'typing-indicator';
+            div.innerHTML = '<span></span><span></span><span></span>';
+            msgs.appendChild(div);
+            scrollChat();
+        }
+
+        function hideTyping() {
+            const t = document.getElementById('typing-indicator');
+            if (t) t.remove();
+        }
+
+        async function sendMessage() {
+            const input = document.getElementById('ai-chat-input');
+            const text = input.value.trim();
+            if (!text) return;
+            input.value = '';
+            input.style.height = 'auto';
+
+            appendMsg('user', text);
+            chatHistory.push({ role:'user', content: text });
+
+            const btn = document.getElementById('ai-chat-send');
+            btn.disabled = true;
+            showTyping();
+
+            try {
+                const res = await fetch('/ai_chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type':'application/json', 'X-CSRFToken': '{{ csrf_token() }}' },
+                    body: JSON.stringify({ message: text, history: chatHistory.slice(-8) })
+                });
+                const data = await res.json();
+                hideTyping();
+                const reply = data.reply || 'Вибачте, сталася помилка. Спробуйте ще раз.';
+                appendMsg('ai', reply);
+                chatHistory.push({ role:'assistant', content: reply });
+            } catch(e) {
+                hideTyping();
+                appendMsg('ai', 'Помилка з\'єднання. Спробуйте пізніше.');
+            }
+            btn.disabled = false;
+            input.focus();
+        }
+
+        document.getElementById('ai-chat-input').addEventListener('keydown', e => {
+            if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+        });
+        document.getElementById('ai-chat-input').addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = Math.min(this.scrollHeight, 100) + 'px';
+        });
+    </script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>

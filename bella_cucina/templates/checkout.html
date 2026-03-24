@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% block title %}Оформлення замовлення — Bella Cucina{% endblock %}
+{% block content %}
+<div class="content-center">
+    <h1>✅ Оформлення замовлення</h1>
+
+    {% if items %}
+        <div style="display:grid; grid-template-columns:2fr 1fr; gap:2rem; align-items:start;">
+            <div>
+                <h2>Ваше замовлення</h2>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr><th>Страва</th><th>К-ть</th><th>Сума</th></tr>
+                        </thead>
+                        <tbody>
+                            {% for item in items %}
+                            <tr>
+                                <td>{{ item.dish.name }}</td>
+                                <td>{{ item.quantity }}</td>
+                                <td style="color:#f0e68c;">${{ "%.2f"|format(item.subtotal) }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="card" style="position:sticky; top:90px;">
+                <h3 style="color:#d4af37; margin-bottom:1.5rem;">💰 Підсумок</h3>
+                <div style="display:flex; flex-direction:column; gap:0.75rem; margin-bottom:1.5rem; padding-bottom:1.5rem; border-bottom:1px solid rgba(212,175,55,0.2);">
+                    <div style="display:flex; justify-content:space-between;">
+                        <span style="color:#aaa;">Підсума:</span>
+                        <span>${{ "%.2f"|format(total) }}</span>
+                    </div>
+                    {% if promo_discount %}
+                    <div style="display:flex; justify-content:space-between;">
+                        <span style="color:#81c784;">Знижка ({{ promo_discount|int }}%):</span>
+                        <span style="color:#81c784;">−${{ "%.2f"|format(total - total_after) }}</span>
+                    </div>
+                    {% endif %}
+                    <div style="display:flex; justify-content:space-between;">
+                        <span style="color:#aaa;">Податок (10%):</span>
+                        <span>${{ "%.2f"|format(total_after * 0.1) }}</span>
+                    </div>
+                    <div style="display:flex; justify-content:space-between;">
+                        <span style="color:#aaa;">Доставка:</span>
+                        <span>$5.00</span>
+                    </div>
+                </div>
+                <div style="display:flex; justify-content:space-between; font-size:1.2rem; font-weight:bold; color:#f0e68c; margin-bottom:1.5rem;">
+                    <span>Разом:</span>
+                    <span>${{ "%.2f"|format(total_after * 1.1 + 5) }}</span>
+                </div>
+                <form method="POST">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button type="submit" style="width:100%; padding:0.9rem; font-size:1rem;">✓ Підтвердити</button>
+                </form>
+                <a href="{{ url_for('cart') }}" class="btn btn-secondary" style="width:100%; text-align:center; margin-top:0.75rem; display:block;">← Назад до кошика</a>
+            </div>
+        </div>
+    {% else %}
+        <div style="text-align:center; padding:3rem; color:#888;">
+            <p style="font-size:1.1rem; margin-bottom:2rem;">Ваш кошик порожній.</p>
+            <a href="{{ url_for('menu') }}" class="btn">Переглянути меню</a>
+        </div>
+    {% endif %}
+</div>
+{% block scripts %}
+<style>
+    @media (max-width:640px) {
+        .content-center > div[style*="grid-template-columns:2fr 1fr"] { grid-template-columns:1fr !important; }
+    }
+</style>
+{% endblock %}
+{% endblock %}

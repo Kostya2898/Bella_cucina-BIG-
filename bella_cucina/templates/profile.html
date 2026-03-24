@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% block title %}Мій профіль — Bella Cucina{% endblock %}
+{% block content %}
+<div style="max-width:700px; margin:0 auto;">
+    <h1>👤 Мій профіль</h1>
+
+    <div class="card" style="margin-bottom:2rem; display:flex; align-items:center; gap:2rem; flex-wrap:wrap;">
+        <div style="width:80px; height:80px; border-radius:50%; background:linear-gradient(135deg,#d4af37,#f0e68c); display:flex; align-items:center; justify-content:center; font-size:2.2rem; flex-shrink:0; color:#1a1a1a; font-weight:bold;">
+            {{ current_user.username[0].upper() }}
+        </div>
+        <div>
+            <div style="font-size:1.4rem; font-weight:bold; color:#f0e68c;">{{ current_user.username }}</div>
+            <div style="color:#aaa; margin-top:0.25rem;">{{ current_user.email }}</div>
+            <div style="color:#888; font-size:0.85rem; margin-top:0.25rem;">
+                Зареєстрований: {{ current_user.created_at.strftime('%d.%m.%Y') }}
+                {% if current_user.is_admin %} &nbsp;·&nbsp; <span style="color:#d4af37;">Адміністратор</span>{% endif %}
+            </div>
+        </div>
+        <div style="margin-left:auto; display:flex; gap:0.75rem; flex-wrap:wrap;">
+            <a href="{{ url_for('orders') }}" class="btn btn-secondary btn-small">Замовлення</a>
+            <a href="{{ url_for('bookings') }}" class="btn btn-secondary btn-small">Бронювання</a>
+        </div>
+    </div>
+
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:2rem;">
+        <div class="content-center">
+            <h2 style="margin-bottom:1.5rem;">✏️ Редагувати профіль</h2>
+            <form method="POST" action="{{ url_for('profile') }}">
+                {{ form.hidden_tag() }}
+                <div class="form-group">
+                    <label>{{ form.username.label.text }}</label>
+                    {{ form.username() }}
+                    {% for e in form.username.errors %}<div class="form-error">{{ e }}</div>{% endfor %}
+                </div>
+                <div class="form-group">
+                    <label>{{ form.email.label.text }}</label>
+                    {{ form.email() }}
+                    {% for e in form.email.errors %}<div class="form-error">{{ e }}</div>{% endfor %}
+                </div>
+                <button type="submit" style="width:100%;">💾 Зберегти зміни</button>
+            </form>
+        </div>
+
+        <div class="content-center">
+            <h2 style="margin-bottom:1.5rem;">🔒 Змінити пароль</h2>
+            <form method="POST" action="{{ url_for('change_password') }}">
+                {{ pw_form.hidden_tag() }}
+                <div class="form-group">
+                    <label>{{ pw_form.current_password.label.text }}</label>
+                    {{ pw_form.current_password(placeholder="Поточний пароль") }}
+                    {% for e in pw_form.current_password.errors %}<div class="form-error">{{ e }}</div>{% endfor %}
+                </div>
+                <div class="form-group">
+                    <label>{{ pw_form.new_password.label.text }}</label>
+                    {{ pw_form.new_password(placeholder="Мінімум 6 символів") }}
+                    {% for e in pw_form.new_password.errors %}<div class="form-error">{{ e }}</div>{% endfor %}
+                </div>
+                <div class="form-group">
+                    <label>{{ pw_form.confirm_password.label.text }}</label>
+                    {{ pw_form.confirm_password(placeholder="Підтвердіть новий пароль") }}
+                    {% for e in pw_form.confirm_password.errors %}<div class="form-error">{{ e }}</div>{% endfor %}
+                </div>
+                <button type="submit" style="width:100%;">🔑 Змінити пароль</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% block scripts %}
+<style>
+    @media (max-width:640px) { div[style*="grid-template-columns:1fr 1fr"]{grid-template-columns:1fr !important;} }
+</style>
+{% endblock %}
+{% endblock %}

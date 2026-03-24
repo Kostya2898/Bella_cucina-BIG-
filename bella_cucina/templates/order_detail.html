@@ -1,0 +1,137 @@
+{% extends "base.html" %}
+{% block title %}Замовлення №{{ order.id }} — Bella Cucina{% endblock %}
+{% block content %}
+<div class="content-center">
+    <a href="{{ url_for('orders') }}" class="back-link">← Назад до замовлень</a>
+
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:2rem; flex-wrap:wrap; gap:1rem;">
+        <h1 style="margin-bottom:0;">Замовлення №{{ order.id }}</h1>
+        <div class="status-badge status-{{ order.status }}" style="font-size:0.95rem; padding:0.5rem 1.2rem;">
+            {% if order.status == 'pending' %}⏳ В очікуванні
+            {% elif order.status == 'confirmed' %}✅ Підтверджено
+            {% elif order.status == 'preparing' %}👨‍🍳 Готується
+            {% elif order.status == 'ready' %}🔔 Готово
+            {% elif order.status == 'delivered' %}🚀 Доставлено
+            {% elif order.status == 'cancelled' %}❌ Скасовано
+            {% else %}{{ order.status }}{% endif %}
+        </div>
+    </div>
+
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:1.5rem; margin-bottom:2rem;">
+        <div class="card">
+            <h3 style="color:#d4af37; margin-bottom:1rem;">ℹ️ Інформація</h3>
+            <div style="display:flex; flex-direction:column; gap:0.75rem;">
+                <div>
+                    <div style="color:#888; font-size:0.83rem;">Дата замовлення</div>
+                    <div>{{ order.created_at.strftime('%d.%m.%Y %H:%M') }}</div>
+                </div>
+                <div>
+                    <div style="color:#888; font-size:0.83rem;">Клієнт</div>
+                    <div>{{ order.customer.username }}</div>
+                </div>
+                <div>
+                    <div style="color:#888; font-size:0.83rem;">Email</div>
+                    <div style="font-size:0.92rem;">{{ order.customer.email }}</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h3 style="color:#d4af37; margin-bottom:1rem;">💰 Вартість</h3>
+            <div style="display:flex; flex-direction:column; gap:0.6rem;">
+                <div style="display:flex; justify-content:space-between;">
+                    <span style="color:#aaa;">Підсума:</span>
+                    <span>${{ "%.2f"|format(order.total_price) }}</span>
+                </div>
+                {% if order.discount %}
+                <div style="display:flex; justify-content:space-between;">
+                    <span style="color:#81c784;">Знижка ({{ order.discount|int }}%):</span>
+                    <span style="color:#81c784;">−</span>
+                </div>
+                {% endif %}
+                <div style="display:flex; justify-content:space-between; padding-bottom:0.6rem; border-bottom:1px solid rgba(212,175,55,0.2);">
+                    <span style="color:#aaa;">Доставка:</span>
+                    <span>$5.00</span>
+                </div>
+                <div style="display:flex; justify-content:space-between; font-size:1.1rem; font-weight:bold; color:#f0e68c;">
+                    <span>Разом:</span>
+                    <span>${{ "%.2f"|format(order.total_price + 5) }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Статус оплати -->
+    {% if order.payment %}
+    <div class="card" style="margin-bottom:2rem; border-color:
+        {% if order.payment.status == 'paid' %}rgba(76,175,80,0.4)
+        {% elif order.payment.status == 'refunded' %}rgba(244,67,54,0.4)
+        {% else %}rgba(212,175,55,0.2){% endif %};">
+        <h3 style="color:#d4af37; margin-bottom:1rem;">💳 Оплата</h3>
+        <div style="display:flex; align-items:center; gap:1.5rem; flex-wrap:wrap;">
+            <div>
+                <div style="color:#888; font-size:0.83rem; margin-bottom:0.3rem;">Спосіб</div>
+                <div style="font-weight:600;">💵 Готівка при отриманні</div>
+            </div>
+            <div>
+                <div style="color:#888; font-size:0.83rem; margin-bottom:0.3rem;">Сума</div>
+                <div style="font-weight:600; color:#d4af37;">${{ "%.2f"|format(order.payment.amount) }}</div>
+            </div>
+            <div>
+                <div style="color:#888; font-size:0.83rem; margin-bottom:0.3rem;">Статус</div>
+                <span class="status-badge
+                    {% if order.payment.status == 'paid' %}status-confirmed
+                    {% elif order.payment.status == 'pending' %}status-pending
+                    {% else %}status-cancelled{% endif %}">
+                    {% if order.payment.status == 'paid' %}✅ Оплачено
+                    {% elif order.payment.status == 'pending' %}⏳ Очікує оплати
+                    {% else %}❌ Скасовано{% endif %}
+                </span>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Позиції -->
+    <div class="card">
+        <h3 style="color:#d4af37; margin-bottom:1rem;">🍽️ Позиції замовлення</h3>
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr><th>Страва</th><th>Ціна</th><th>К-ть</th><th>Сума</th></tr>
+                </thead>
+                <tbody>
+                    {% for item in order.items %}
+                    <tr>
+                        <td>
+                            <a href="{{ url_for('dish_detail', dish_id=item.dish_id) }}"
+                               style="color:#d4af37; text-decoration:none;">{{ item.dish.name }}</a>
+                        </td>
+                        <td>${{ "%.2f"|format(item.price) }}</td>
+                        <td>{{ item.quantity }}</td>
+                        <td style="color:#f0e68c;">${{ "%.2f"|format(item.price * item.quantity) }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    {% if order.status == 'confirmed' %}
+    <div style="margin-top:1.5rem;">
+        <form method="POST" action="{{ url_for('cancel_order', order_id=order.id) }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button type="submit" class="btn btn-danger">❌ Скасувати замовлення</button>
+        </form>
+    </div>
+    {% endif %}
+</div>
+
+{% block scripts %}
+<style>
+    @media (max-width:600px) {
+        div[style*="grid-template-columns:1fr 1fr"] { grid-template-columns:1fr !important; }
+    }
+</style>
+{% endblock %}
+{% endblock %}

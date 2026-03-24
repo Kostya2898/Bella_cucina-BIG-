@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% block title %}Бронювання столика — Bella Cucina{% endblock %}
+{% block content %}
+<div style="max-width:600px; margin:0 auto;">
+    <div class="content-center">
+        <div style="text-align:center; margin-bottom:2rem;">
+            <div style="font-size:2.5rem; margin-bottom:0.75rem;">📅</div>
+            <h1 style="margin-bottom:0.5rem;">Забронюйте столик</h1>
+            <p style="color:#aaa; font-size:0.92rem;">Відчуйте вишуканість Bella Cucina. Забронюйте місце зараз.</p>
+        </div>
+
+        <form method="POST">
+            {{ form.hidden_tag() }}
+
+            <div class="form-group">
+                <label>{{ form.booking_date.label.text }}</label>
+                {{ form.booking_date(type="datetime-local") }}
+                {% for error in form.booking_date.errors %}
+                    <div class="form-error">{{ error }}</div>
+                {% endfor %}
+            </div>
+
+            <div class="form-group">
+                <label>{{ form.guests.label.text }}</label>
+                {{ form.guests(min="1", max="20", placeholder="Кількість гостей") }}
+                {% for error in form.guests.errors %}
+                    <div class="form-error">{{ error }}</div>
+                {% endfor %}
+            </div>
+
+            <div class="form-group">
+                <label>{{ form.notes.label.text }}</label>
+                {{ form.notes(rows="4", placeholder="Спеціальні побажання, алергії, привід...") }}
+            </div>
+
+            <button type="submit" style="width:100%; padding:0.9rem; font-size:1rem; margin-top:0.5rem;">📅 Забронювати столик</button>
+        </form>
+
+        <div style="margin-top:2.5rem; padding-top:2rem; border-top:1px solid rgba(212,175,55,0.2);">
+            <h3 style="color:#d4af37; margin-bottom:1.2rem;">🕐 Години роботи</h3>
+            <div style="display:flex; flex-direction:column; gap:0.75rem; font-size:0.93rem;">
+                <div style="display:flex; justify-content:space-between;">
+                    <span style="color:#aaa;">Понеділок — Четвер</span>
+                    <span>17:00 — 23:00</span>
+                </div>
+                <div style="display:flex; justify-content:space-between;">
+                    <span style="color:#aaa;">П'ятниця — Субота</span>
+                    <span>17:00 — 00:00</span>
+                </div>
+                <div style="display:flex; justify-content:space-between;">
+                    <span style="color:#aaa;">Неділя</span>
+                    <span>17:00 — 22:00</span>
+                </div>
+                <div style="display:flex; justify-content:space-between;">
+                    <span style="color:#aaa;">Понеділок (обід)</span>
+                    <span style="color:#ef5350;">Вихідний</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

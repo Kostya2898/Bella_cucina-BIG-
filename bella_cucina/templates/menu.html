@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+{% block title %}Меню — Bella Cucina{% endblock %}
+{% block content %}
+<div class="content-center">
+    <h1>🍽️ Наше меню</h1>
+
+    <!-- Пошук -->
+    <div style="margin-bottom:1.5rem;">
+        <input type="text" id="searchInput" placeholder="🔍 Пошук страви..." oninput="filterDishes()"
+               style="max-width:400px; padding:0.75rem 1rem; font-size:0.95rem;">
+    </div>
+
+    <!-- Категорії -->
+    <div style="display:flex; gap:0.6rem; margin-bottom:2rem; flex-wrap:wrap;">
+        {% set cats = [('all','🍽️ Усі'), ('appetizers','🥗 Закуски'), ('main','🍝 Основні страви'), ('desserts','🍮 Десерти'), ('drinks','🍷 Напої')] %}
+        {% for key, label in cats %}
+            <a href="{{ url_for('menu', category=key) }}" style="text-decoration:none;">
+                <button style="
+                    background:{% if category == key %}linear-gradient(135deg,#d4af37,#f0e68c){% else %}rgba(212,175,55,0.12){% endif %};
+                    color:{% if category == key %}#1a1a1a{% else %}#d4af37{% endif %};
+                    border:1px solid {% if category == key %}transparent{% else %}rgba(212,175,55,0.25){% endif %};
+                    padding:0.5rem 1.1rem; font-size:0.9rem;">
+                    {{ label }}
+                </button>
+            </a>
+        {% endfor %}
+    </div>
+
+    {% if dishes %}
+        <div class="grid" id="dishesGrid">
+            {% for dish in dishes %}
+                <div class="card dish-card" style="cursor:pointer; overflow:hidden; padding:0;"
+                     data-name="{{ dish.name|lower }}"
+                     data-desc="{{ dish.description|lower if dish.description else '' }}"
+                     onclick="location.href='{{ url_for('dish_detail', dish_id=dish.id) }}'">
+                    {% if dish.image_url %}
+                        <div style="overflow:hidden; height:190px;">
+                            <img src="{{ dish.image_url }}" alt="{{ dish.name }}"
+                                 style="width:100%; height:190px; object-fit:cover; transition:transform 0.4s;"
+                                 onmouseover="this.style.transform='scale(1.07)'"
+                                 onmouseout="this.style.transform='scale(1)'">
+                        </div>
+                    {% else %}
+                        <div style="width:100%; height:190px; background:rgba(212,175,55,0.08); display:flex; align-items:center; justify-content:center; font-size:3rem;">🍽️</div>
+                    {% endif %}
+                    <div style="padding:1.2rem;">
+                        <div class="card-title">{{ dish.name }}</div>
+                        <p style="font-size:0.88rem; color:#aaa; margin:0.5rem 0 1rem; line-height:1.5;">{{ dish.description[:90] if dish.description else 'Смачна страва' }}…</p>
+                        <div style="display:flex; justify-content:space-between; align-items:center;">
+                            <div class="card-price">${{ "%.2f"|format(dish.price) }}</div>
+                            <button onclick="event.stopPropagation(); location.href='{{ url_for('dish_detail', dish_id=dish.id) }}'"
+                                    style="padding:0.45rem 1rem; font-size:0.85rem;">Детальніше</button>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+        <div id="noResults" style="display:none; text-align:center; padding:3rem; color:#888;">
+            <p style="font-size:1.1rem;">Нічого не знайдено 😕</p>
+        </div>
+    {% else %}
+        <div style="text-align:center; padding:3rem; color:#888;">
+            <p style="font-size:1.1rem;">У цій категорії поки немає страв.</p>
+        </div>
+    {% endif %}
+</div>
+
+{% block scripts %}
+<script>
+    function filterDishes() {
+        const q = document.getElementById('searchInput').value.toLowerCase().trim();
+        const cards = document.querySelectorAll('.dish-card');
+        let visible = 0;
+        cards.forEach(card => {
+            const name = card.dataset.name || '';
+            const desc = card.dataset.desc || '';
+            const match = name.includes(q) || desc.includes(q);
+            card.style.display = match ? '' : 'none';
+            if (match) visible++;
+        });
+        document.getElementById('noResults').style.display = visible === 0 ? 'block' : 'none';
+    }
+</script>
+{% endblock %}
+{% endblock %}

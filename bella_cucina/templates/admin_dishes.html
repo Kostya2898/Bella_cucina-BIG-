@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% block title %}Управління меню — Bella Cucina{% endblock %}
+{% block content %}
+<div class="content-center">
+    <a href="{{ url_for('admin_dashboard') }}" class="back-link">← Назад до адмінки</a>
+    <h1>🍽️ Управління меню</h1>
+
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:2rem;">
+        <!-- Форма додавання -->
+        <div class="card">
+            <h3 style="color:#d4af37; margin-bottom:1.5rem;">➕ Додати нову страву</h3>
+            <form method="POST">
+                {{ form.hidden_tag() }}
+                <div class="form-group">
+                    <label>{{ form.name.label.text }}</label>
+                    {{ form.name(placeholder="Назва страви") }}
+                </div>
+                <div class="form-group">
+                    <label>{{ form.description.label.text }}</label>
+                    {{ form.description(rows="3", placeholder="Опис страви...") }}
+                </div>
+                <div class="form-group">
+                    <label>{{ form.price.label.text }}</label>
+                    {{ form.price(placeholder="0.00") }}
+                </div>
+                <div class="form-group">
+                    <label>{{ form.category.label.text }}</label>
+                    {{ form.category() }}
+                </div>
+                <div class="form-group">
+                    <label>{{ form.image_url.label.text }}</label>
+                    {{ form.image_url(placeholder="https://example.com/image.jpg") }}
+                </div>
+                <button type="submit" style="width:100%;">➕ Додати страву</button>
+            </form>
+        </div>
+
+        <!-- Список страв -->
+        <div>
+            <h3 style="color:#d4af37; margin-bottom:1.2rem;">📋 Поточні страви ({{ dishes|length }})</h3>
+            <div style="max-height:580px; overflow-y:auto; display:flex; flex-direction:column; gap:0.75rem;">
+                {% if dishes %}
+                    {% for dish in dishes %}
+                        <div class="card" style="padding:1rem;">
+                            <div style="display:flex; justify-content:space-between; align-items:start; gap:0.75rem;">
+                                <div style="flex:1; min-width:0;">
+                                    <div class="card-title" style="font-size:0.95rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">{{ dish.name }}</div>
+                                    <div style="font-size:0.82rem; color:#888; margin:0.25rem 0;">
+                                        {% if dish.category == 'appetizers' %}Закуски
+                                        {% elif dish.category == 'main' %}Основні страви
+                                        {% elif dish.category == 'desserts' %}Десерти
+                                        {% elif dish.category == 'drinks' %}Напої
+                                        {% else %}{{ dish.category }}
+                                        {% endif %}
+                                    </div>
+                                    <div class="card-price" style="font-size:1rem;">${{ "%.2f"|format(dish.price) }}</div>
+                                </div>
+                                <button onclick="deleteDish({{ dish.id }})" class="btn btn-danger btn-small" style="flex-shrink:0;">Видалити</button>
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <p style="color:#888;">Поки немає страв.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block scripts %}
+<script>
+    function deleteDish(dishId) {
+        if (confirm('Видалити цю страву з меню?')) {
+            fetch(`/admin/delete_dish/${dishId}`, { method: 'POST' })
+                .then(r => r.json())
+                .then(d => { if (d.success) location.reload(); else alert('Помилка видалення'); });
+        }
+    }
+</script>
+<style>
+    @media (max-width: 700px) {
+        .content-center > div[style*="grid-template-columns:1fr 1fr"] {
+            grid-template-columns: 1fr !important;
+        }
+    }
+</style>
+{% endblock %}
+{% endblock %}

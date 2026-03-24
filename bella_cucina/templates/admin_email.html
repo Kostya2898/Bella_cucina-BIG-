@@ -1,0 +1,109 @@
+{% extends "base.html" %}
+{% block title %}Email налаштування — Bella Cucina{% endblock %}
+{% block content %}
+<div class="content-center" style="max-width:700px; margin:0 auto;">
+    <a href="{{ url_for('admin_dashboard') }}" class="back-link">← Назад до адмінки</a>
+    <h1>📧 Email сповіщення</h1>
+
+    <!-- Статус -->
+    <div class="card" style="margin-bottom:2rem; border-color:{% if mail_enabled %}rgba(76,175,80,0.4){% else %}rgba(244,67,54,0.4){% endif %};">
+        <div style="display:flex; align-items:center; gap:1rem; flex-wrap:wrap;">
+            <div style="font-size:2.5rem;">{% if mail_enabled %}✅{% else %}❌{% endif %}</div>
+            <div>
+                <div style="font-size:1.1rem; font-weight:bold; color:{% if mail_enabled %}#81c784{% else %}#ef5350{% endif %};">
+                    {% if mail_enabled %}Email сповіщення активні{% else %}Email сповіщення вимкнені{% endif %}
+                </div>
+                <div style="color:#888; font-size:0.88rem; margin-top:0.25rem;">
+                    {% if mail_enabled %}
+                        Відправник: <span style="color:#d4af37;">{{ mail_sender }}</span>
+                    {% else %}
+                        Налаштуйте змінні середовища для активації
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Що надсилається -->
+    <h2 style="margin-bottom:1.5rem;">📬 Автоматичні листи</h2>
+    <div style="display:flex; flex-direction:column; gap:1rem; margin-bottom:2.5rem;">
+
+        <div class="card" style="padding:1.2rem;">
+            <div style="display:flex; align-items:center; gap:1rem; flex-wrap:wrap;">
+                <div style="font-size:1.8rem;">🛒</div>
+                <div style="flex:1;">
+                    <div style="font-weight:bold; color:#f0e68c;">Підтвердження замовлення</div>
+                    <div style="color:#aaa; font-size:0.88rem; margin-top:0.2rem;">Надсилається клієнту одразу після оформлення замовлення. Містить список страв і загальну суму.</div>
+                </div>
+                <span style="padding:0.3rem 0.85rem; border-radius:20px; font-size:0.8rem; font-weight:600; background:rgba(76,175,80,0.2); color:#81c784; white-space:nowrap;">Автоматично</span>
+            </div>
+        </div>
+
+        <div class="card" style="padding:1.2rem;">
+            <div style="display:flex; align-items:center; gap:1rem; flex-wrap:wrap;">
+                <div style="font-size:1.8rem;">🔄</div>
+                <div style="flex:1;">
+                    <div style="font-weight:bold; color:#f0e68c;">Зміна статусу замовлення</div>
+                    <div style="color:#aaa; font-size:0.88rem; margin-top:0.2rem;">Надсилається при зміні статусу: Підтверджено → Готується → Готово → Доставлено / Скасовано.</div>
+                </div>
+                <span style="padding:0.3rem 0.85rem; border-radius:20px; font-size:0.8rem; font-weight:600; background:rgba(76,175,80,0.2); color:#81c784; white-space:nowrap;">При зміні</span>
+            </div>
+        </div>
+
+        <div class="card" style="padding:1.2rem;">
+            <div style="display:flex; align-items:center; gap:1rem; flex-wrap:wrap;">
+                <div style="font-size:1.8rem;">📅</div>
+                <div style="flex:1;">
+                    <div style="font-weight:bold; color:#f0e68c;">Підтвердження бронювання</div>
+                    <div style="color:#aaa; font-size:0.88rem; margin-top:0.2rem;">Надсилається клієнту при оформленні запиту на бронювання столика.</div>
+                </div>
+                <span style="padding:0.3rem 0.85rem; border-radius:20px; font-size:0.8rem; font-weight:600; background:rgba(76,175,80,0.2); color:#81c784; white-space:nowrap;">Автоматично</span>
+            </div>
+        </div>
+
+        <div class="card" style="padding:1.2rem;">
+            <div style="display:flex; align-items:center; gap:1rem; flex-wrap:wrap;">
+                <div style="font-size:1.8rem;">✅</div>
+                <div style="flex:1;">
+                    <div style="font-weight:bold; color:#f0e68c;">Зміна статусу бронювання</div>
+                    <div style="color:#aaa; font-size:0.88rem; margin-top:0.2rem;">Надсилається при підтвердженні або скасуванні бронювання адміністратором.</div>
+                </div>
+                <span style="padding:0.3rem 0.85rem; border-radius:20px; font-size:0.8rem; font-weight:600; background:rgba(76,175,80,0.2); color:#81c784; white-space:nowrap;">При зміні</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Інструкція -->
+    {% if not mail_enabled %}
+    <div class="card" style="border-color:rgba(33,150,243,0.3);">
+        <h3 style="color:#64b5f6; margin-bottom:1.2rem;">⚙️ Як налаштувати</h3>
+        <p style="color:#aaa; margin-bottom:1rem; font-size:0.93rem;">Встановіть змінні середовища перед запуском сервера:</p>
+        <div style="background:rgba(0,0,0,0.3); border-radius:8px; padding:1rem; font-family:monospace; font-size:0.85rem; color:#e0e0e0; line-height:1.9; overflow-x:auto;">
+            <span style="color:#888;"># Windows (PowerShell)</span><br>
+            $env:MAIL_USERNAME = "your@gmail.com"<br>
+            $env:MAIL_PASSWORD = "your_app_password"<br>
+            $env:MAIL_DEFAULT_SENDER = "Bella Cucina &lt;your@gmail.com&gt;"<br><br>
+            <span style="color:#888;"># Linux / Mac</span><br>
+            export MAIL_USERNAME="your@gmail.com"<br>
+            export MAIL_PASSWORD="your_app_password"<br>
+            export MAIL_DEFAULT_SENDER="Bella Cucina &lt;your@gmail.com&gt;"
+        </div>
+        <div style="margin-top:1rem; padding:0.9rem 1rem; background:rgba(255,193,7,0.08); border-radius:8px; border-left:3px solid #ffd54f;">
+            <p style="color:#ffd54f; font-size:0.88rem; margin:0;">
+                💡 <strong>Gmail:</strong> увімкніть двоетапну перевірку → згенеруйте <em>App Password</em> (не звичайний пароль!) на <a href="https://myaccount.google.com/apppasswords" style="color:#d4af37;" target="_blank">myaccount.google.com/apppasswords</a>
+            </p>
+        </div>
+    </div>
+    {% else %}
+    <!-- Тест відправки -->
+    <div class="card">
+        <h3 style="color:#d4af37; margin-bottom:1.2rem;">🧪 Тестовий лист</h3>
+        <p style="color:#aaa; margin-bottom:1.2rem; font-size:0.93rem;">Надіслати тестовий email на адресу адміністратора, щоб перевірити налаштування.</p>
+        <form method="POST" action="{{ url_for('admin_send_test_email') }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button type="submit" class="btn">📤 Надіслати тестовий лист</button>
+        </form>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

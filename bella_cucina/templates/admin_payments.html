@@ -1,0 +1,163 @@
+{% extends "base.html" %}
+{% block title %}Історія платежів — Bella Cucina{% endblock %}
+{% block content %}
+<div class="content-center">
+    <a href="{{ url_for('admin_dashboard') }}" class="back-link">← Назад до адмінки</a>
+    <h1>💳 Історія платежів</h1>
+
+    {% if payments %}
+        <!-- Статистика -->
+        {% set paid_total = payments | selectattr('status','eq','paid') | sum(attribute='amount') %}
+        {% set refunded_count = payments | selectattr('status','eq','refunded') | list | length %}
+        <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:1rem; margin-bottom:2rem;">
+            <div class="card" style="text-align:center; padding:1rem;">
+                <div style="font-size:1.6rem; color:#d4af37; font-weight:bold;">${{ "%.2f"|format(paid_total) }}</div>
+                <div style="color:#aaa; font-size:0.82rem; margin-top:0.3rem;">Отримано коштів</div>
+            </div>
+            <div class="card" style="text-align:center; padding:1rem;">
+                <div style="font-size:1.6rem; color:#f0e68c; font-weight:bold;">{{ payments | length }}</div>
+                <div style="color:#aaa; font-size:0.82rem; margin-top:0.3rem;">Всього платежів</div>
+            </div>
+            <div class="card" style="text-align:center; padding:1rem;">
+                <div style="font-size:1.6rem; color:#ef5350; font-weight:bold;">{{ refunded_count }}</div>
+                <div style="color:#aaa; font-size:0.82rem; margin-top:0.3rem;">Повернень</div>
+            </div>
+        </div>
+
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>ІД</th>
+                        <th>Замовлення</th>
+                        <th>Клієнт</th>
+                        <th>Сума</th>
+                        <th>Провайдер</th>
+                        <th>Статус</th>
+                        <th>Дата</th>
+                        <th>Дія</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for p in payments %}
+                    <tr>
+                        <td style="color:#666;">#{{ p.id }}</td>
+                        <td>
+                            <a href="{{ url_for('order_detail', order_id=p.order_id) }}"
+                               style="color:#d4af37; text-decoration:none;">#{{ p.order_id }}</a>
+                        </td>
+                        <td style="font-size:0.9rem;">{{ p.payer.username }}</td>
+                        <td style="font-weight:bold; color:#f0e68c;">${{ "%.2f"|format(p.amount) }}</td>
+                        <td>
+                            {% if p.provider == 'stripe' %}
+                                <span style="color:#635bff; font-weight:600;">💳 Stripe</span>
+                            {% elif p.provider == 'liqpay' %}
+                                <span style="color:#6db33f; font-weight:600;">🇺🇦 LiqPay</span>
+                            {% else %}
+                                <span style="color:#aaa;">💵 Готівка</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <span class="status-badge
+                                {% if p.status == 'paid' %}status-confirmed
+                                {% elif p.status == 'pending' %}status-pending
+                                {% elif p.status == 'refunded' %}status-cancelled
+                                {% else %}status-cancelled{% endif %}">
+                                {% if p.status == 'paid' %}✅ Оплачено
+                                {% elif p.status == 'pending' %}⏳ Очікує
+                                {% elif p.status == 'refunded' %}↩️ Повернено
+                                {% else %}❌ Помилка{% endif %}
+                            </span>
+                        </td>
+                        <td style="white-space:nowrap; color:#888; font-size:0.85rem;">
+                            {{ p.created_at.strftime('%d.%m.%Y %H:%M') }}
+                        </td>
+                        <td>
+                            {% if p.status == 'paid' and p.provider in ('stripe','liqpay') %}
+                                <button onclick="openRefund({{ p.id }}, '{{ p.payer.username }}', {{ p.amount }})"
+                                        class="btn-small btn-danger">↩️ Повернути</button>
+                            {% else %}
+                                <span style="color:#444; font-size:0.82rem;">—</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div style="text-align:center; padding:3rem; color:#888;">
+            <div style="font-size:3rem; margin-bottom:1rem;">💳</div>
+            <p>Платежів ще немає.</p>
+        </div>
+    {% endif %}
+</div>
+
+<!-- Модальне вікно повернення -->
+<div id="refund-modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.7); z-index:9999; align-items:center; justify-content:center;">
+    <div style="background:#1a1f3a; border:1px solid rgba(212,175,55,0.3); border-radius:14px; padding:2rem; max-width:440px; width:90%; margin:1rem;">
+        <h3 style="color:#f0e68c; margin-bottom:0.5rem;">↩️ Повернення коштів</h3>
+        <p style="color:#aaa; font-size:0.9rem; margin-bottom:1.5rem;">
+            Клієнт: <strong id="refund-user" style="color:#f0e68c;"></strong> —
+            Сума: <strong id="refund-amount" style="color:#d4af37;"></strong>
+        </p>
+        <div class="form-group">
+            <label>Причина повернення</label>
+            <textarea id="refund-reason" rows="3" placeholder="Наприклад: помилка замовлення, скарга клієнта..."></textarea>
+        </div>
+        <div style="display:flex; gap:0.75rem; justify-content:flex-end; margin-top:1.5rem;">
+            <button onclick="closeRefund()" class="btn btn-secondary">Скасувати</button>
+            <button onclick="submitRefund()" class="btn btn-danger">↩️ Підтвердити повернення</button>
+        </div>
+    </div>
+</div>
+
+{% block scripts %}
+<script>
+    let currentPaymentId = null;
+
+    function openRefund(id, user, amount) {
+        currentPaymentId = id;
+        document.getElementById('refund-user').textContent   = user;
+        document.getElementById('refund-amount').textContent = `$${amount.toFixed(2)}`;
+        document.getElementById('refund-reason').value       = '';
+        const modal = document.getElementById('refund-modal');
+        modal.style.display = 'flex';
+    }
+
+    function closeRefund() {
+        document.getElementById('refund-modal').style.display = 'none';
+        currentPaymentId = null;
+    }
+
+    async function submitRefund() {
+        if (!currentPaymentId) return;
+        const reason = document.getElementById('refund-reason').value.trim();
+        if (!reason) {
+            alert('Вкажіть причину повернення');
+            return;
+        }
+        const formData = new FormData();
+        formData.append('reason', reason);
+        formData.append('csrf_token', '{{ csrf_token() }}');
+        try {
+            const res  = await fetch(`/admin/refund/${currentPaymentId}`, { method:'POST', body: formData });
+            const data = await res.json();
+            if (data.success) {
+                closeRefund();
+                location.reload();
+            } else {
+                alert(data.error || 'Помилка повернення');
+            }
+        } catch(e) {
+            alert('Помилка: ' + e.message);
+        }
+    }
+
+    // Закриття по кліку поза модалкою
+    document.getElementById('refund-modal').addEventListener('click', function(e) {
+        if (e.target === this) closeRefund();
+    });
+</script>
+{% endblock %}
+{% endblock %}

@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block title %}429 — Забагато запитів{% endblock %}
+{% block content %}
+<div style="text-align:center; padding:4rem 1rem;">
+    <div style="font-size:6rem; margin-bottom:1rem; line-height:1;">⏳</div>
+    <h1 style="font-size:clamp(3rem,10vw,6rem); margin-bottom:0.5rem; background:linear-gradient(135deg,#d4af37,#f0e68c); background-clip:text; -webkit-background-clip:text; -webkit-text-fill-color:transparent;">429</h1>
+    <h2 style="margin-bottom:1rem; color:#aaa;">Забагато запитів</h2>
+    <p style="color:#888; max-width:450px; margin:0 auto 2.5rem; line-height:1.7;">
+        Ви надсилаєте запити занадто часто. Будь ласка, зачекайте кілька хвилин і спробуйте знову.
+    </p>
+    <a href="{{ url_for('index') }}" class="btn">На головну</a>
+</div>
+{% endblock %}

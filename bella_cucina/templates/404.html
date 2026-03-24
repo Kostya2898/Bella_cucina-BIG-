@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}404 — Сторінку не знайдено{% endblock %}
+{% block content %}
+<div style="text-align:center; padding:4rem 1rem;">
+    <div style="font-size:6rem; margin-bottom:1rem; line-height:1;">🍝</div>
+    <h1 style="font-size:clamp(3rem,10vw,6rem); margin-bottom:0.5rem; background:linear-gradient(135deg,#d4af37,#f0e68c); background-clip:text; -webkit-background-clip:text; -webkit-text-fill-color:transparent;">404</h1>
+    <h2 style="margin-bottom:1rem; color:#aaa;">Сторінку не знайдено</h2>
+    <p style="color:#888; max-width:400px; margin:0 auto 2.5rem; line-height:1.7;">
+        Здається, ця страва вже закінчилась або сторінка переїхала на інший стіл 🍽️
+    </p>
+    <div style="display:flex; gap:1rem; justify-content:center; flex-wrap:wrap;">
+        <a href="{{ url_for('index') }}" class="btn">На головну</a>
+        <a href="{{ url_for('menu') }}" class="btn btn-secondary">До меню</a>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block title %}Мої бронювання — Bella Cucina{% endblock %}
+{% block content %}
+<div class="content-center">
+    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem; margin-bottom:1rem;">
+        <h1 style="margin-bottom:0;">📅 Мої бронювання</h1>
+        <a href="{{ url_for('booking') }}" class="btn" style="padding:0.55rem 1.2rem; font-size:0.9rem;">+ Нове бронювання</a>
+    </div>
+
+    {% if bookings %}
+        <div class="grid">
+            {% for booking in bookings %}
+                <div class="card">
+                    <div style="display:flex; justify-content:space-between; align-items:start; margin-bottom:1rem; gap:0.5rem;">
+                        <div>
+                            <div class="card-title">Бронювання №{{ booking.id }}</div>
+                            <div style="font-size:0.82rem; color:#888; margin-top:0.25rem;">Створено: {{ booking.created_at.strftime('%d.%m.%Y') }}</div>
+                        </div>
+                        <div class="status-badge status-{{ booking.status }}">
+                            {% if booking.status == 'pending' %}В очікуванні
+                            {% elif booking.status == 'confirmed' %}Підтверджено
+                            {% elif booking.status == 'cancelled' %}Скасовано
+                            {% else %}{{ booking.status }}
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div style="padding:1rem 0; border-top:1px solid rgba(212,175,55,0.15); border-bottom:1px solid rgba(212,175,55,0.15); margin-bottom:1rem; display:flex; flex-direction:column; gap:0.5rem;">
+                        <div style="display:flex; justify-content:space-between;">
+                            <span style="color:#aaa; font-size:0.88rem;">Дата та час:</span>
+                            <span style="color:#f0e68c; font-weight:600;">{{ booking.booking_date.strftime('%d.%m.%Y %H:%M') }}</span>
+                        </div>
+                        <div style="display:flex; justify-content:space-between;">
+                            <span style="color:#aaa; font-size:0.88rem;">Гостей:</span>
+                            <span style="color:#d4af37; font-weight:600;">{{ booking.guests }} ос.</span>
+                        </div>
+                        {% if booking.table_number %}
+                        <div style="display:flex; justify-content:space-between;">
+                            <span style="color:#aaa; font-size:0.88rem;">Столик №:</span>
+                            <span>{{ booking.table_number }}</span>
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    {% if booking.notes %}
+                        <div style="padding:0.75rem; background:rgba(212,175,55,0.05); border-radius:6px; font-size:0.88rem; color:#aaa; border:1px solid rgba(212,175,55,0.1);">
+                            <span style="color:#888; font-size:0.82rem;">Примітки: </span>{{ booking.notes }}
+                        </div>
+                    {% endif %}
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div style="text-align:center; padding:3rem; color:#888;">
+            <div style="font-size:4rem; margin-bottom:1rem;">📅</div>
+            <p style="font-size:1.1rem; margin-bottom:2rem;">Ви ще не робили бронювань.</p>
+            <a href="{{ url_for('booking') }}" class="btn">Забронювати столик</a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

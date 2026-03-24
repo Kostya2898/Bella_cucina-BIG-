@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+{% block title %}Управління користувачами — Bella Cucina{% endblock %}
+{% block content %}
+<div class="content-center">
+    <a href="{{ url_for('admin_dashboard') }}" class="back-link">← Назад до адмінки</a>
+    <h1>👥 Управління користувачами</h1>
+
+    {% if users %}
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>ІД</th>
+                        <th>Нікнейм</th>
+                        <th>Email</th>
+                        <th>Роль</th>
+                        <th>Статус</th>
+                        <th>Реєстрація</th>
+                        <th>Замовлень</th>
+                        <th>Дія</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user in users %}
+                        <tr>
+                            <td>#{{ user.id }}</td>
+                            <td style="font-weight:500;">{{ user.username }}</td>
+                            <td style="color:#aaa; font-size:0.9rem;">{{ user.email }}</td>
+                            <td>
+                                <span style="padding:0.25rem 0.75rem; border-radius:20px; font-size:0.8rem; font-weight:600;
+                                    background:{% if user.is_admin %}rgba(76,175,80,0.2){% else %}rgba(33,150,243,0.2){% endif %};
+                                    color:{% if user.is_admin %}#81c784{% else %}#64b5f6{% endif %};">
+                                    {% if user.is_admin %}Адмін{% else %}Користувач{% endif %}
+                                </span>
+                            </td>
+                            <td>
+                                <span id="status-label-{{ user.id }}" style="padding:0.25rem 0.75rem; border-radius:20px; font-size:0.8rem; font-weight:600;
+                                    background:{% if user.is_blocked %}rgba(244,67,54,0.2){% else %}rgba(76,175,80,0.2){% endif %};
+                                    color:{% if user.is_blocked %}#ef5350{% else %}#81c784{% endif %};">
+                                    {% if user.is_blocked %}Заблоковано{% else %}Активний{% endif %}
+                                </span>
+                            </td>
+                            <td style="white-space:nowrap; color:#888; font-size:0.88rem;">{{ user.created_at.strftime('%d.%m.%Y') }}</td>
+                            <td style="color:#d4af37; font-weight:600;">{{ user.orders|length }}</td>
+                            <td>
+                                {% if not user.is_admin %}
+                                    <button id="block-btn-{{ user.id }}"
+                                        onclick="toggleBlock({{ user.id }}, this)"
+                                        class="btn-small {% if user.is_blocked %}btn-success{% else %}btn-danger{% endif %}">
+                                        {% if user.is_blocked %}Розблокувати{% else %}Заблокувати{% endif %}
+                                    </button>
+                                {% else %}
+                                    <span style="color:#555; font-size:0.82rem;">—</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div style="text-align:center; padding:3rem; color:#888;">
+            <p>Користувачів не знайдено.</p>
+        </div>
+    {% endif %}
+</div>
+
+{% block scripts %}
+<script>
+    function toggleBlock(userId, btn) {
+        if (!confirm('Змінити статус цього користувача?')) return;
+        fetch(`/admin/block_user/${userId}`, { method: 'POST' })
+            .then(r => r.json())
+            .then(d => {
+                if (d.success) {
+                    const label = document.getElementById(`status-label-${userId}`);
+                    if (d.is_blocked) {
+                        label.textContent = 'Заблоковано';
+                        label.style.background = 'rgba(244,67,54,0.2)';
+                        label.style.color = '#ef5350';
+                        btn.textContent = 'Розблокувати';
+                        btn.classList.remove('btn-danger');
+                        btn.classList.add('btn-success');
+                    } else {
+                        label.textContent = 'Активний';
+                        label.style.background = 'rgba(76,175,80,0.2)';
+                        label.style.color = '#81c784';
+                        btn.textContent = 'Заблокувати';
+                        btn.classList.remove('btn-success');
+                        btn.classList.add('btn-danger');
+                    }
+                } else {
+                    alert(d.error || 'Помилка');
+                }
+            });
+    }
+</script>
+{% endblock %}
+{% endblock %}
